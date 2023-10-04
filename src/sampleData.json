@@ -1,4 +1,33 @@
 {
+    "sampleFirstNames": [
+        "Gideon",
+        "Lyria",
+        "Eldorin",
+        "Elowen",
+        "Voren",
+        "Naelis",
+        "Gryphon",
+        "Lirelle",
+        "Seraphina",
+        "Kaelar",
+        "Draven",
+        "Isolde",
+        "Rurik"
+    ],
+    "sampleLastNames": [
+        "Heartwell",
+        "Lovelace",
+        "Hearthstone",
+        "Valentine",
+        "Hearthaven",
+        "Cardia",
+        "Emberheart",
+        "Leonhart",
+        "Heartfield",
+        "Heartsworth",
+        "Ardorson",
+        "Loopington"
+    ],
     "sampleCountries": [
         "Narnia",
         "Novarctica",

@@ -1,7 +1,7 @@
 import { Experience, Program, Role } from "./schemaTypes";
 import json from "./sampleData.json" assert { type: "json" };
 
-const { gibberish, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
+const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
 
 // helper functions
 
@@ -78,6 +78,21 @@ export function randomLanguage(): string {
 }
 
 // randomizers
+
+export function randomName(): string {
+    const firstName = pickFrom(sampleFirstNames);
+    const lastName = pickFrom(sampleLastNames);
+    const numMid = randInt(0, 3);
+    const midInitials = [];
+    
+    for (let i = 0; i < numMid; i++) {
+        midInitials.push(`${randChar()}.`);
+    }
+
+    const midInit = midInitials.join(" ");
+
+    return [firstName, midInit, lastName].join(" ");
+}
 
 export function randomAccreditations(): string[] {
     const numAccreditations = randInt(1,3);

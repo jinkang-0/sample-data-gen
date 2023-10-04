@@ -1,4 +1,4 @@
-import { randomNumString, randInt, randomParagraph, randomInitials, randomCountry, randBool, randomLocation, randomDateFromNow, randomExperience, randomLanguageList, randomRoles, randomProgram, pickFrom, randomAccreditations, pickSomeFrom } from "./randomizers.ts";
+import { randomNumString, randInt, randomParagraph, randomInitials, randomCountry, randBool, randomLocation, randomDateFromNow, randomExperience, randomLanguageList, randomRoles, randomProgram, pickFrom, randomAccreditations, pickSomeFrom, randomName } from "./randomizers.ts";
 import { Interest, CaseListing, TranslationRequest, Profile, LimitedAssistance } from "./schemaTypes.ts";
 import { writeFile } from "fs";
 import { randomUUID } from "crypto";
@@ -238,6 +238,7 @@ function randomTranslationRequest(): TranslationRequest {
 function randomProfile(): Profile {
     const u: Profile = {
         userId: randomUUID(),
+        name: randomName(),
         roles: randomRoles(),
         languages: randomLanguageList(),
         accreditations: randomAccreditations(),
