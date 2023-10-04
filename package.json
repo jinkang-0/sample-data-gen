@@ -1,0 +1,20 @@
+{
+  "name": "ijp_sample_data_generator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "ts-node-esm src/main.ts",
+    "test": "ts-node-esm src/testJson.ts",
+    "edit": "ts-node-esm src/editData.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.6.3",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}
