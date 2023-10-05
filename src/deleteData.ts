@@ -21,6 +21,12 @@ readline.question("THIS WILL PURGE EVERYTHING IN THE DATABASE, ARE YOU SURE YOU 
 
 
 async function main() {
+    if (!process.env.SUPABASE_URL) {
+        throw new Error("Error accessing SUPABASE URL");
+    } else if (!process.env.SUPABASE_ANON_KEY) {
+        throw new Error("Error accessing SUPABASE KEY");
+    }
+
     const supabase = createClient(
         process.env.SUPABASE_URL,
         process.env.SUPABASE_ANON_KEY

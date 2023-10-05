@@ -1,65 +1,13 @@
-import { randomNumString, randInt, randomParagraph, randomInitials, randomCountry, randBool, randomLocation, randomDateFromNow, randomExperience, randomLanguageList, randomRoles, randomProgram, pickFrom, randomAccreditations, pickSomeFrom, randomName } from "./randomizers.ts";
-import { Interest, CaseListing, TranslationRequest, Profile, LimitedAssistance } from "./schemaTypes.ts";
+import { buildCases, buildProfiles, buildInterests } from "./dataBuilder.ts";
 import { writeFile } from "fs";
-import { randomUUID } from "crypto";
 
-// global config
-const NUM_CASES = 100;
-const NUM_LIMITED_ASSISTANCES = 66;
-const NUM_TRANSLATION_REQUESTS = 80;
-const NUM_PROFILES = 180;
-const NUM_INTERESTS = 200;
-
-// helpers
-const caseLegalServerIds = new Set();
-
-// generate json
-const cases: CaseListing[] = [];
-const limitedAssistances: LimitedAssistance[] = [];
-const translationRequests: TranslationRequest[] = [];
-const profiles: Profile[] = [];
-const interests: Interest[] = [];
-
-for (let i = 0; i < NUM_CASES; i++) {
-    cases.push(randomCaseListing());
-}
-
-for (let i = 0; i < NUM_LIMITED_ASSISTANCES; i++) {
-    const c = pickFrom(cases);
-    limitedAssistances.push(randomLimitedAssistance(c));
-}
-
-for (let i = 0; i < NUM_TRANSLATION_REQUESTS; i++) {
-    translationRequests.push(randomTranslationRequest());
-}
-
-for (let i = 0; i < NUM_PROFILES; i++) {
-    profiles.push(randomProfile());
-}
-
-for (let i = 0; i < NUM_INTERESTS; i++) {
-    const listingType = randInt(0, 3);
-    let listing: CaseListing | LimitedAssistance | TranslationRequest;
-    let lType = "";
-
-    // pick listing
-    if (listingType == 0) {
-        listing = pickFrom(cases);
-        lType = "Case";
-    } else if (listingType == 1) {
-        listing = pickFrom(limitedAssistances);
-        lType = "Limited Assistance";
-    } else {
-        listing = pickFrom(translationRequests);
-        lType = "Translation Request";
-    }
-
-    // pick user
-    const u = pickFrom(profiles);
-
-    interests.push(randomInterest(listing, lType, u));
-}
-
+const cases = buildCases();
+const profiles = buildProfiles();
+const interests = buildInterests(
+    { cases: true, limitedAssistances: false, translationRequests: false },
+    { cases: cases },
+    profiles
+);
 
 // generate CSV
 // const casesCSVHeader = "id,summary,languages,country,legal_server_id,client_initials,time_to_complete,is_remote,client_location,program,upcoming_hearing_date,needs_interpreter,interest_ids\n";
@@ -160,8 +108,8 @@ for (let i = 0; i < NUM_INTERESTS; i++) {
 // generate JSON
 const allData = {
     cases: cases,
-    limitedAssistance: limitedAssistances,
-    translationRequests: translationRequests,
+    // limitedAssistance: limitedAssistances,
+    // translationRequests: translationRequests,
     profiles: profiles,
     interests: interests
 };
@@ -179,100 +127,6 @@ writeFile("./outputs/output.json", stringifiedData, 'utf8', (err) => {
 
 
 
-
-// helper functions
-function randomCaseListing(): CaseListing {
-    const randSummaryLength = randInt(40, 60);
-
-    let legalServerId = randomNumString(3);
-    while (caseLegalServerIds.has(legalServerId)) {
-        legalServerId = randomNumString(3);
-    }
-    caseLegalServerIds.add(legalServerId);
-
-    const c: CaseListing = {
-        id: randomUUID(),
-        legal_server_id: legalServerId,
-        client_initials: randomInitials(),
-        country: randomCountry(),
-        time_to_complete: randomDateFromNow(30, 180),
-        is_remote: randBool(),
-        languages: randomLanguageList(),
-        client_location: randomLocation(),
-        summary: randomParagraph(randSummaryLength),
-        program: randomProgram(),
-        upcoming_hearing_date: randomDateFromNow(30, 60),
-        needs_interpreter: randBool(),
-        interest_ids: []
-    };
-
-    return c;
-}
-
-function randomLimitedAssistance(caseListing: CaseListing): LimitedAssistance {
-    const r: LimitedAssistance = {
-        id: randomUUID(),
-        summary: caseListing.summary,
-        languages: caseListing.languages,
-        country: randomCountry(),
-        experience_level: randomExperience(),
-        deadline: randomDateFromNow(21, 180),
-        interest_ids: []
-    };
-
-    return r;
-}
-
-function randomTranslationRequest(): TranslationRequest {
-    const randSummaryLength = randInt(40, 60);
-
-    const t: TranslationRequest = {
-        id: randomUUID(),
-        languages: randomLanguageList(),
-        summary: randomParagraph(randSummaryLength),
-        interest_ids: []
-    };
-
-    return t;
-}
-
-function randomProfile(): Profile {
-    const u: Profile = {
-        user_id: randomUUID(),
-        name: randomName(),
-        roles: randomRoles(),
-        languages: randomLanguageList(),
-        accreditations: randomAccreditations(),
-        hours_per_week: randInt(7, 16),
-        immigration_law_experience: randomExperience(),
-        bar_number: randomNumString(6),
-        start_date: randomDateFromNow(5, 14),
-        interest_ids: []
-    };
-
-    return u;
-}
-
-function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: string, profile: Profile): Interest {
-
-    const numToPick = randInt(1, profile.roles.length);
-
-    const it: Interest = {
-        id: randomUUID(),
-        listing_id: listing.id,
-        listing_type: listingType,
-        form_response: {
-            whyInterested: randomParagraph(randInt(40, 60)),
-            interestType: pickSomeFrom(profile.roles, numToPick)
-        },
-        user_id: profile.user_id
-    }
-
-    listing.interest_ids.push(it.id);
-    profile.interest_ids.push(it.id);
-
-    return it;
-}
 
 
 

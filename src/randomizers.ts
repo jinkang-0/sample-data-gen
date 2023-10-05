@@ -57,6 +57,14 @@ export function knuthShuffleShallow(arr: Array<any>): Array<any> {
 
 // basic pickers
 
+export function randomLastName(): string {
+    return pickFrom(sampleLastNames);
+}
+
+export function randomFirstName(): string {
+    return pickFrom(sampleFirstNames);
+}
+
 export function randomCountry(): string {
     return pickFrom(sampleCountries);
 }
@@ -78,21 +86,6 @@ export function randomLanguage(): string {
 }
 
 // randomizers
-
-export function randomName(): string {
-    const firstName = pickFrom(sampleFirstNames);
-    const lastName = pickFrom(sampleLastNames);
-    const numMid = randInt(0, 3);
-    const midInitials = [];
-    
-    for (let i = 0; i < numMid; i++) {
-        midInitials.push(`${randChar().toUpperCase()}.`);
-    }
-
-    const midInit = (midInitials.length > 0)? ` ${midInitials.join(" ")} ` : " ";
-
-    return `${firstName}${midInit}${lastName}`;
-}
 
 export function randomAccreditations(): string[] {
     const numAccreditations = randInt(1,3);

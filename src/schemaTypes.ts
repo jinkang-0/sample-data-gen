@@ -50,7 +50,8 @@ export type Interest = {
 
 export type Profile = {
     user_id: UUID;
-    name: string;
+    first_name: string;
+    last_name: string;
     roles: Role[];
     languages: string[];
     accreditations: string[];
