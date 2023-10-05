@@ -86,12 +86,12 @@ export function randomName(): string {
     const midInitials = [];
     
     for (let i = 0; i < numMid; i++) {
-        midInitials.push(`${randChar()}.`);
+        midInitials.push(`${randChar().toUpperCase()}.`);
     }
 
-    const midInit = midInitials.join(" ");
+    const midInit = (midInitials.length > 0)? ` ${midInitials.join(" ")} ` : " ";
 
-    return [firstName, midInit, lastName].join(" ");
+    return `${firstName}${midInit}${lastName}`;
 }
 
 export function randomAccreditations(): string[] {

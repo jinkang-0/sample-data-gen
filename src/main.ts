@@ -62,119 +62,120 @@ for (let i = 0; i < NUM_INTERESTS; i++) {
 
 
 // generate CSV
-const casesCSVHeader = "id,summary,languages,country,legal_server_id,client_initials,time_to_complete,is_remote,client_location,program,upcoming_hearing_date,needs_interpreter,interest_ids\n";
-const limitedAssistancesCSVHeader = "id,summary,languages,country,experience_level,deadline,interest_ids\n";
-const translationRequestsCSVHeader = "id,summary,languages,interest_ids\n";
-const interestsCSVHeader = "id,listing_id,listing_type,user_id,form_response\n";
-const profilesCSVHeader = "id,roles,languages,accreditations,hours_per_week,immigration_law_experience,bar_number,start_date,interest_ids\n";
+// const casesCSVHeader = "id,summary,languages,country,legal_server_id,client_initials,time_to_complete,is_remote,client_location,program,upcoming_hearing_date,needs_interpreter,interest_ids\n";
+// const limitedAssistancesCSVHeader = "id,summary,languages,country,experience_level,deadline,interest_ids\n";
+// const translationRequestsCSVHeader = "id,summary,languages,interest_ids\n";
+// const interestsCSVHeader = "id,listing_id,listing_type,user_id,form_response\n";
+// const profilesCSVHeader = "id,name,roles,languages,accreditations,hours_per_week,immigration_law_experience,bar_number,start_date,interest_ids\n";
 
-const casesCSVList = [];
-const limitedAssistancesCSVList = [];
-const translationRequestsCSVList = [];
-const interestsCSVList = [];
-const profilesCSVList = [];
+// const casesCSVList = [];
+// const limitedAssistancesCSVList = [];
+// const translationRequestsCSVList = [];
+// const interestsCSVList = [];
+// const profilesCSVList = [];
 
-// format cases
-for (let c of cases) {
-    const fLanguages = strArrToJSONStr(c.languages);
-    const fSummary = wrapInQuotes(c.summary);
-    const fInterestIds = strArrToJSONStr(c.interestIds);
-    const fCountry = wrapInQuotes(c.country);
-    const fInitials = wrapInQuotes(c.clientInitials);
-    const fLocation = wrapInQuotes(c.clientLocation);
-    const fTimeToComplete = wrapInQuotes(c.timeToComplete);
-    const fHearingDate = wrapInQuotes(c.upcomingHearingDate);
+// // format cases
+// for (let c of cases) {
+//     const fLanguages = strArrToJSONStr(c.languages);
+//     const fSummary = wrapInQuotes(c.summary);
+//     const fInterestIds = strArrToJSONStr(c.interestIds);
+//     const fCountry = wrapInQuotes(c.country);
+//     const fInitials = wrapInQuotes(c.clientInitials);
+//     const fLocation = wrapInQuotes(c.clientLocation);
+//     const fTimeToComplete = wrapInQuotes(c.timeToComplete);
+//     const fHearingDate = wrapInQuotes(c.upcomingHearingDate);
 
-    casesCSVList.push(`${c.id},${fSummary},${fLanguages},${fCountry},${c.legalServerId},${fInitials},${fTimeToComplete},${c.isRemote},${fLocation},${c.program},${fHearingDate},${c.needsInterpreter},${fInterestIds}`);
-}
+//     casesCSVList.push(`${c.id},${fSummary},${fLanguages},${fCountry},${c.legalServerId},${fInitials},${fTimeToComplete},${c.isRemote},${fLocation},${c.program},${fHearingDate},${c.needsInterpreter},${fInterestIds}`);
+// }
 
-// format limitedAssistances
-for (let la of limitedAssistances) {
-    const fSummary = wrapInQuotes(la.summary);
-    const fLanguages = strArrToJSONStr(la.languages);
-    const fCountry = wrapInQuotes(la.country);
-    const fInterestIds = strArrToJSONStr(la.interestIds);
-    const fDeadline = wrapInQuotes(la.deadline);
+// // format limitedAssistances
+// for (let la of limitedAssistances) {
+//     const fSummary = wrapInQuotes(la.summary);
+//     const fLanguages = strArrToJSONStr(la.languages);
+//     const fCountry = wrapInQuotes(la.country);
+//     const fInterestIds = strArrToJSONStr(la.interestIds);
+//     const fDeadline = wrapInQuotes(la.deadline);
 
-    limitedAssistancesCSVList.push(`${la.id},${fSummary},${fLanguages},${fCountry},${la.experienceLevel},${fDeadline},${fInterestIds}`);
-}
+//     limitedAssistancesCSVList.push(`${la.id},${fSummary},${fLanguages},${fCountry},${la.experienceLevel},${fDeadline},${fInterestIds}`);
+// }
 
-// format translationRequests
-for (let t of translationRequests) {
-    const fLanguages = strArrToJSONStr(t.languages);
-    const fSummary = wrapInQuotes(t.summary);
-    const fInterestIds = strArrToJSONStr(t.interestIds);
+// // format translationRequests
+// for (let t of translationRequests) {
+//     const fLanguages = strArrToJSONStr(t.languages);
+//     const fSummary = wrapInQuotes(t.summary);
+//     const fInterestIds = strArrToJSONStr(t.interestIds);
     
-    translationRequestsCSVList.push(`${t.id},${fSummary},${fLanguages},${fInterestIds}`);
-}
+//     translationRequestsCSVList.push(`${t.id},${fSummary},${fLanguages},${fInterestIds}`);
+// }
 
-// format interests
-for (let i of interests) {
-    const formattedInterestType = i.formResponse.interestType.map(t => `""${t}""`).join(",");
-    const fFormResponse = wrapInQuotes(`{""whyInterested"":""${i.formResponse.whyInterested}"", ""interestType"":[${formattedInterestType}]}`);
+// // format interests
+// for (let i of interests) {
+//     const formattedInterestType = i.formResponse.interestType.map(t => `""${t}""`).join(",");
+//     const fFormResponse = wrapInQuotes(`{""whyInterested"":""${i.formResponse.whyInterested}"", ""interestType"":[${formattedInterestType}]}`);
 
-    interestsCSVList.push(`${i.id},${i.listingId},${i.listingType},${i.userId},${fFormResponse}`);
-}
+//     interestsCSVList.push(`${i.id},${i.listingId},${i.listingType},${i.userId},${fFormResponse}`);
+// }
 
-// format profiles
-for (let p of profiles) {
-    const fRoles = strArrToJSONStr(p.roles);
-    const fLanguages = strArrToJSONStr(p.languages);
-    const fAccreditations = strArrToJSONStr(p.accreditations);
-    const fInterestIds = strArrToJSONStr(p.interestIds);
-    const fStartDate = wrapInQuotes(p.startDate);
+// // format profiles
+// for (let p of profiles) {
+//     const fRoles = strArrToJSONStr(p.roles);
+//     const fName = wrapInQuotes(p.name);
+//     const fLanguages = strArrToJSONStr(p.languages);
+//     const fAccreditations = strArrToJSONStr(p.accreditations);
+//     const fInterestIds = strArrToJSONStr(p.interestIds);
+//     const fStartDate = wrapInQuotes(p.startDate);
 
-    profilesCSVList.push(`${p.userId},${fRoles},${fLanguages},${fAccreditations},${p.hoursPerWeek},${p.immigrationLawExperience},${p.barNumber},${fStartDate},${fInterestIds}`);
-}
-
-
-// join strings
-const casesCSVString = casesCSVHeader + casesCSVList.join("\n");
-const limitedAssistancesCSVString = limitedAssistancesCSVHeader + limitedAssistancesCSVList.join("\n");
-const translationRequestsCSVString = translationRequestsCSVHeader + translationRequestsCSVList.join("\n");
-const interestsCSVString = interestsCSVHeader + interestsCSVList.join("\n");
-const profilesCSVString = profilesCSVHeader + profilesCSVList.join("\n");
+//     profilesCSVList.push(`${p.userId},${fName},${fRoles},${fLanguages},${fAccreditations},${p.hoursPerWeek},${p.immigrationLawExperience},${p.barNumber},${fStartDate},${fInterestIds}`);
+// }
 
 
-// write to CSV
-const resolutionFunc = (file: string) => {
-    return (err) => {
-        if (err) {
-            console.error("An error occurred while writing JSON to file:", err);
-            return;
-        }
+// // join strings
+// const casesCSVString = casesCSVHeader + casesCSVList.join("\n");
+// const limitedAssistancesCSVString = limitedAssistancesCSVHeader + limitedAssistancesCSVList.join("\n");
+// const translationRequestsCSVString = translationRequestsCSVHeader + translationRequestsCSVList.join("\n");
+// const interestsCSVString = interestsCSVHeader + interestsCSVList.join("\n");
+// const profilesCSVString = profilesCSVHeader + profilesCSVList.join("\n");
 
-        console.log(`${file} has been successfully saved.`);
-    }
-}
 
-writeFile("outputs/cases.csv", casesCSVString, 'utf8', resolutionFunc("cases.csv"));
-writeFile("outputs/limitedAssistances.csv", limitedAssistancesCSVString, 'utf8', resolutionFunc("limitedAssistances.csv"));
-writeFile("outputs/translationRequests.csv", translationRequestsCSVString, 'utf8', resolutionFunc("translationRequests.csv"));
-writeFile("outputs/interests.csv", interestsCSVString, 'utf8', resolutionFunc("interests.csv"));
-writeFile("outputs/profiles.csv", profilesCSVString, 'utf8', resolutionFunc("profiles.csv"));
+// // write to CSV
+// const resolutionFunc = (file: string) => {
+//     return (err) => {
+//         if (err) {
+//             console.error("An error occurred while writing JSON to file:", err);
+//             return;
+//         }
+
+//         console.log(`${file} has been successfully saved.`);
+//     }
+// }
+
+// writeFile("outputs/cases.csv", casesCSVString, 'utf8', resolutionFunc("cases.csv"));
+// writeFile("outputs/limitedAssistances.csv", limitedAssistancesCSVString, 'utf8', resolutionFunc("limitedAssistances.csv"));
+// writeFile("outputs/translationRequests.csv", translationRequestsCSVString, 'utf8', resolutionFunc("translationRequests.csv"));
+// writeFile("outputs/interests.csv", interestsCSVString, 'utf8', resolutionFunc("interests.csv"));
+// writeFile("outputs/profiles.csv", profilesCSVString, 'utf8', resolutionFunc("profiles.csv"));
 
 
 
 // generate JSON
-// const allData = {
-//     cases: cases,
-//     limitedAssistance: limitedAssistances,
-//     translationRequests: translationRequests,
-//     profiles: profiles,
-//     interests: interests
-// };
-// const stringifiedData = JSON.stringify(allData);
+const allData = {
+    cases: cases,
+    limitedAssistance: limitedAssistances,
+    translationRequests: translationRequests,
+    profiles: profiles,
+    interests: interests
+};
+const stringifiedData = JSON.stringify(allData);
 
 // write json
-// writeFile("../outputs/output.json", stringifiedData, 'utf8', (err) => {
-//     if (err) {
-//         console.error("An error occurred while writing JSON to file:", err);
-//         return;
-//     }
+writeFile("./outputs/output.json", stringifiedData, 'utf8', (err) => {
+    if (err) {
+        console.error("An error occurred while writing JSON to file:", err);
+        return;
+    }
 
-//     console.log("JSON file has been saved to output.json");
-// });
+    console.log("JSON file has been saved to output.json");
+});
 
 
 
@@ -191,18 +192,18 @@ function randomCaseListing(): CaseListing {
 
     const c: CaseListing = {
         id: randomUUID(),
-        legalServerId: legalServerId,
-        clientInitials: randomInitials(),
+        legal_server_id: legalServerId,
+        client_initials: randomInitials(),
         country: randomCountry(),
-        timeToComplete: randomDateFromNow(30, 180),
-        isRemote: randBool(),
+        time_to_complete: randomDateFromNow(30, 180),
+        is_remote: randBool(),
         languages: randomLanguageList(),
-        clientLocation: randomLocation(),
+        client_location: randomLocation(),
         summary: randomParagraph(randSummaryLength),
         program: randomProgram(),
-        upcomingHearingDate: randomDateFromNow(30, 60),
-        needsInterpreter: randBool(),
-        interestIds: []
+        upcoming_hearing_date: randomDateFromNow(30, 60),
+        needs_interpreter: randBool(),
+        interest_ids: []
     };
 
     return c;
@@ -214,9 +215,9 @@ function randomLimitedAssistance(caseListing: CaseListing): LimitedAssistance {
         summary: caseListing.summary,
         languages: caseListing.languages,
         country: randomCountry(),
-        experienceLevel: randomExperience(),
+        experience_level: randomExperience(),
         deadline: randomDateFromNow(21, 180),
-        interestIds: []
+        interest_ids: []
     };
 
     return r;
@@ -229,7 +230,7 @@ function randomTranslationRequest(): TranslationRequest {
         id: randomUUID(),
         languages: randomLanguageList(),
         summary: randomParagraph(randSummaryLength),
-        interestIds: []
+        interest_ids: []
     };
 
     return t;
@@ -237,16 +238,16 @@ function randomTranslationRequest(): TranslationRequest {
 
 function randomProfile(): Profile {
     const u: Profile = {
-        userId: randomUUID(),
+        user_id: randomUUID(),
         name: randomName(),
         roles: randomRoles(),
         languages: randomLanguageList(),
         accreditations: randomAccreditations(),
-        hoursPerWeek: randInt(7, 16),
-        immigrationLawExperience: randomExperience(),
-        barNumber: randomNumString(6),
-        startDate: randomDateFromNow(5, 14),
-        interestIds: []
+        hours_per_week: randInt(7, 16),
+        immigration_law_experience: randomExperience(),
+        bar_number: randomNumString(6),
+        start_date: randomDateFromNow(5, 14),
+        interest_ids: []
     };
 
     return u;
@@ -258,17 +259,17 @@ function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRe
 
     const it: Interest = {
         id: randomUUID(),
-        listingId: listing.id,
-        listingType: listingType,
-        formResponse: {
+        listing_id: listing.id,
+        listing_type: listingType,
+        form_response: {
             whyInterested: randomParagraph(randInt(40, 60)),
             interestType: pickSomeFrom(profile.roles, numToPick)
         },
-        userId: profile.userId
+        user_id: profile.user_id
     }
 
-    listing.interestIds.push(it.id);
-    profile.interestIds.push(it.id);
+    listing.interest_ids.push(it.id);
+    profile.interest_ids.push(it.id);
 
     return it;
 }

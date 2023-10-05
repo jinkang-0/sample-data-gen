@@ -9,15 +9,15 @@ export type CaseListing = {
     summary: string;
     languages: string[];
     country: string;
-    legalServerId: number;
-    clientInitials: string;
-    timeToComplete: string;
-    isRemote: boolean;
-    clientLocation: string;
+    legal_server_id: number;
+    client_initials: string;
+    time_to_complete: string;
+    is_remote: boolean;
+    client_location: string;
     program: Program;
-    upcomingHearingDate: string;
-    needsInterpreter: boolean;
-    interestIds: UUID[];
+    upcoming_hearing_date: string;
+    needs_interpreter: boolean;
+    interest_ids: UUID[];
 };
 
 export type LimitedAssistance = {
@@ -25,38 +25,38 @@ export type LimitedAssistance = {
     summary: string;
     languages: string[];
     country: string;
-    experienceLevel: Experience;
+    experience_level: Experience;
     deadline: string;
-    interestIds: UUID[];
+    interest_ids: UUID[];
 };
 
 export type TranslationRequest = {
     id: UUID;
     summary: string;
     languages: string[];
-    interestIds: UUID[];
+    interest_ids: UUID[];
 };
 
 export type Interest = {
     id: UUID;
-    listingId: UUID;
-    listingType: string;
-    userId: UUID;
-    formResponse: {
+    listing_id: UUID;
+    listing_type: string;
+    user_id: UUID;
+    form_response: {
         whyInterested: string;
         interestType: string[];
     };
 };
 
 export type Profile = {
-    userId: UUID;
+    user_id: UUID;
     name: string;
     roles: Role[];
     languages: string[];
     accreditations: string[];
-    hoursPerWeek: number;
-    immigrationLawExperience: Experience;
-    barNumber: number;
-    startDate: string;
-    interestIds: UUID[];
+    hours_per_week: number;
+    immigration_law_experience: Experience;
+    bar_number: number;
+    start_date: string;
+    interest_ids: UUID[];
 };
