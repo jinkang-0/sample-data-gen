@@ -2,31 +2,23 @@ import { randomUUID } from "crypto";
 import { pickFrom, pickSomeFrom, randBool, randInt, randomAccreditations, randomCountry, randomDateFromNow, randomExperience, randomFirstName, randomInitials, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomProgram, randomRoles } from "./randomizers.ts";
 import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schemaTypes.ts";
 
-// global config
-const NUM_CASES = 100;
-const NUM_LIMITED_ASSISTANCES = 66;
-const NUM_TRANSLATION_REQUESTS = 80;
-const NUM_PROFILES = 180;
-const NUM_INTERESTS = 200;
-
-
 
 // export builders
-export function buildCases(): CaseListing[] {
+export function buildCases(numCases: number): CaseListing[] {
     const cases: CaseListing[] = [];
     const caseLegalServerIds = new Set<number>();    
     
-    for (let i = 0; i < NUM_CASES; i++) {
+    for (let i = 0; i < numCases; i++) {
         cases.push(randomCaseListing(caseLegalServerIds));
     }
 
     return cases;
 }
 
-export function buildLimitedAssistances(cases: CaseListing[]): LimitedAssistance[] {
+export function buildLimitedAssistances(numLimitedAssistances: number, cases: CaseListing[]): LimitedAssistance[] {
     const limitedAssistances: LimitedAssistance[] = [];
 
-    for (let i = 0; i < NUM_LIMITED_ASSISTANCES; i++) {
+    for (let i = 0; i < numLimitedAssistances; i++) {
         const c = pickFrom(cases);
         limitedAssistances.push(randomLimitedAssistance(c));
     }
@@ -34,20 +26,20 @@ export function buildLimitedAssistances(cases: CaseListing[]): LimitedAssistance
     return limitedAssistances
 }
 
-export function buildTranslationRequests(cases: CaseListing[]): TranslationRequest[] {
+export function buildTranslationRequests(numTranslationRequests: number): TranslationRequest[] {
     const translationRequests: TranslationRequest[] = [];
     
-    for (let i = 0; i < NUM_TRANSLATION_REQUESTS; i++) {
+    for (let i = 0; i < numTranslationRequests; i++) {
         translationRequests.push(randomTranslationRequest());
     }
 
     return translationRequests;
 }
 
-export function buildProfiles(): Profile[] {
+export function buildProfiles(numProfiles: number): Profile[] {
     const profiles: Profile[] = [];
 
-    for (let i = 0; i < NUM_PROFILES; i++) {
+    for (let i = 0; i < numProfiles; i++) {
         profiles.push(randomProfile());
     }
 
@@ -55,6 +47,7 @@ export function buildProfiles(): Profile[] {
 }
 
 export function buildInterests(
+    numInterests: number,
     types: {
         cases: boolean,
         limitedAssistances: boolean,
@@ -100,7 +93,7 @@ export function buildInterests(
 
     const len = typeOptions.length;
 
-    for (let i = 0; i < NUM_INTERESTS; i++) {
+    for (let i = 0; i < numInterests; i++) {
         const index = randInt(0, len);
         const listingsOp = listingOptions[index];
         const listingType = typeOptions[index];
@@ -211,3 +204,4 @@ function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRe
 
     return it;
 }
+

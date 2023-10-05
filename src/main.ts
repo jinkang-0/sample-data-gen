@@ -1,9 +1,18 @@
 import { buildCases, buildProfiles, buildInterests } from "./dataBuilder.ts";
 import { writeFile } from "fs";
 
-const cases = buildCases();
-const profiles = buildProfiles();
+// global config
+const NUM_CASES = 100;
+const NUM_LIMITED_ASSISTANCES = 66;
+const NUM_TRANSLATION_REQUESTS = 80;
+const NUM_PROFILES = 180;
+const NUM_INTERESTS = 100;
+
+// build data
+const cases = buildCases(NUM_CASES);
+const profiles = buildProfiles(NUM_PROFILES);
 const interests = buildInterests(
+    NUM_INTERESTS,
     { cases: true, limitedAssistances: false, translationRequests: false },
     { cases: cases },
     profiles
