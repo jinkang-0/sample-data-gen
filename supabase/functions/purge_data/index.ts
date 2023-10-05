@@ -3,14 +3,11 @@
 // This enables autocomplete, go to definition, etc.
 
 import { createClient } from "@supabase/supabase-js";
-import { buildCases, buildInterests, buildProfiles } from "./builder.ts";
-import { CaseListing, Profile, Interest } from "./schemaTypes.ts";
+import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
 
-const NUM_CASES = 100;
-const NUM_PROFILES = 180;
-const NUM_INTERESTS = 100;
+const randomUUID = v4.generate;
 
-console.log("Building data...")
+console.log("Purging data...")
 
 Deno.serve(async (req) => {
   try {
@@ -28,28 +25,19 @@ Deno.serve(async (req) => {
         }
     );
 
-    // build data
-    const cases = buildCases(NUM_CASES);
-    const profiles = buildProfiles(NUM_PROFILES);
-    const interests = buildInterests(
-        NUM_INTERESTS,
-        { cases: true, limitedAssistances: false, translationRequests: false },
-        { cases: cases },
-        profiles
-    );
-
-    // insert data
-    const insertTo = async (table: string, data: (CaseListing[] | Profile[] | Interest[])) => {
-        const { error } = await supabase.from(table).insert(data);
+    // purge original data
+    const nullUUID = randomUUID();
+    const deleteFrom = async (table: string, pickColumn: string) => {
+        const { error } = await supabase.from(table).delete().neq(pickColumn, nullUUID);
         if (error)
-            throw error
+            throw new Error(`Error deleting ${table}: ${error.message}`);
     }
 
-    await insertTo("cases", cases);
-    await insertTo("interests", interests);
-    await insertTo("profiles", profiles);
+    await deleteFrom("cases", "id");
+    await deleteFrom("interests", "id");
+    await deleteFrom("profiles", "user_id");
 
-    console.log("Successfully added data!");
+    console.log("Successfully purged data!");
 
     return new Response(JSON.stringify({ message: "Success" }), {
         headers: { "Content-Type": "application/json" },
