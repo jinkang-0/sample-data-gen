@@ -25,6 +25,8 @@ Deno.serve(async (req) => {
         }
     );
 
+    // if this point is reached without error, auth is good
+
     // purge original data
     const nullUUID = randomUUID();
     const deleteFrom = async (table: string, pickColumn: string) => {

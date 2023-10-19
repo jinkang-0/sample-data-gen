@@ -6,65 +6,75 @@ import { createClient } from "@supabase/supabase-js";
 import { buildCases, buildInterests, buildProfiles } from "./builder.ts";
 import { CaseListing, Profile, Interest } from "./schema.ts";
 
-const NUM_CASES = 100;
-const NUM_PROFILES = 180;
-const NUM_INTERESTS = 100;
-
-console.log("Building data...")
-
 Deno.serve(async (req) => {
-  try {
-    // connect to supabase
-    const supabase = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-        {
-            global: {
-                headers: { Authorization: req.headers.get('Authorization')! }
-            },
-            auth: {
-                persistSession: false
+    try {
+        // connect to supabase
+        const supabase = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+            {
+                global: {
+                    headers: {
+                        Authorization: req.headers.get("Authorization")!
+                    }
+                },
+                auth: {
+                    persistSession: false
+                }
             }
-        }
-    );
+        );
 
-    // build data
-    const cases = buildCases(NUM_CASES);
-    const profiles = buildProfiles(NUM_PROFILES);
-    const interests = buildInterests(
-        NUM_INTERESTS,
-        { cases: true, limitedAssistances: false, translationRequests: false },
-        { cases: cases },
-        profiles
-    );
+        // if this point is reached without error, auth is good
 
-    // insert data
-    const insertTo = async (table: string, data: (CaseListing[] | Profile[] | Interest[])) => {
-        const { error } = await supabase.from(table).insert(data);
-        if (error)
-            throw error
+        // get params
+        const body = await req.json();
+        const NUM_CASES = (body.numCases && parseInt(body.numCases)) || 100;
+        const NUM_PROFILES = (body.numProfiles && parseInt(body.numProfiles)) || 180;
+        const NUM_INTERESTS = (body.numInterests && parseInt(body.numInterests)) || 6000;
+
+        // build data
+        const cases = buildCases(NUM_CASES);
+        const profiles = buildProfiles(NUM_PROFILES);
+        const interests = buildInterests(
+            NUM_INTERESTS,
+            {
+                cases: true,
+                limitedAssistances: false,
+                translationRequests: false
+            },
+            { cases: cases },
+            profiles
+        );
+
+        // insert data
+        const insertTo = async (
+            table: string,
+            data: CaseListing[] | Profile[] | Interest[]
+        ) => {
+            const { error } = await supabase.from(table).insert(data);
+            if (error) throw error;
+        };
+
+        await insertTo("cases", cases);
+        await insertTo("interests", interests);
+        await insertTo("profiles", profiles);
+
+        console.log("Successfully added data!");
+
+        return new Response(JSON.stringify({ message: "Success" }), {
+            headers: { "Content-Type": "application/json" },
+            status: 200
+        });
+
+        // catch errors
+    } catch (error) {
+        console.error(error);
+
+        return new Response(JSON.stringify({ error: error.message }), {
+            headers: { "Content-Type": "application/json" },
+            status: 400
+        });
     }
-
-    await insertTo("cases", cases);
-    await insertTo("interests", interests);
-    await insertTo("profiles", profiles);
-
-    console.log("Successfully added data!");
-
-    return new Response(JSON.stringify({ message: "Success" }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200
-    });
-
-    // catch errors
-  } catch (error) {
-    console.error(error);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-    });
-  }
 });
 
 // To invoke:

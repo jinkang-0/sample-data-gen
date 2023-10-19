@@ -1,5 +1,5 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
-import { pickFrom, pickSomeFrom, randBool, randInt, randomAccreditations, randomCountry, randomDateFromNow, randomExperience, randomFirstName, randomInitials, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomProgram, randomRoles } from "./tools.ts";
+import { pickFrom, pickSomeFrom, randBool, randInt, randomAgency, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomFirstName, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
 import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schema.ts";
 
 const randomUUID = v4.generate;
@@ -124,17 +124,20 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     const c: CaseListing = {
         id: randomUUID(),
         legal_server_id: legalServerId,
-        client_initials: randomInitials(),
         country: randomCountry(),
-        time_to_complete: randomDateFromNow(30, 180),
+        upcoming_date: randomDateFromNow(30, 180),
         is_remote: randBool(),
         languages: randomLanguageList(),
         client_location: randomLocation(),
         summary: randomParagraph(randSummaryLength),
-        program: randomProgram(),
-        upcoming_hearing_date: randomDateFromNow(30, 60),
         needs_interpreter: randBool(),
-        interest_ids: []
+        hours_per_month: randInt(20, 200),
+        title: randomParagraph(randInt(2, 8)),
+        num_months: randInt(1, 5),
+        in_court: randBool(),
+        needs_attorney: randBool(),
+        relief_sought: randomAgency(),
+        active: randBool(0.7)
     };
 
     return c;
@@ -173,13 +176,16 @@ function randomProfile(): Profile {
         first_name: randomFirstName(),
         last_name: randomLastName(),
         roles: randomRoles(),
-        languages: randomLanguageList(),
-        accreditations: randomAccreditations(),
-        hours_per_week: randInt(7, 16),
+        languages: randomLanguageOptions(),
+        hours_per_month: randInt(40, 240),
         immigration_law_experience: randomExperience(),
         bar_number: randomNumString(6),
         start_date: randomDateFromNow(5, 14),
-        interest_ids: []
+        interest_ids: [],
+        status: randInt(0, 3),
+        availability_description: randomParagraph(randInt(0, 30)),
+        eoir_registered: randBool(),
+        location: randomLocation()
     };
 
     return u;
@@ -200,7 +206,6 @@ function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRe
         user_id: profile.user_id
     }
 
-    listing.interest_ids.push(it.id);
     profile.interest_ids.push(it.id);
 
     return it;

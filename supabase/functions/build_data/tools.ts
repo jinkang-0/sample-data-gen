@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Experience, Program, Role } from "./schema.ts";
+import { Experience, Program, Role, Agency, LanguageOptions } from "./schema.ts";
 import json from "./sampleData.json" assert { type: "json" };
 
 const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
@@ -28,8 +28,8 @@ export function randInt(min: number, max: number): number {
     return Math.floor(randFloat(min, max));
 }
 
-export function randBool(): boolean {
-    return Math.random() > 0.5;
+export function randBool(influence=0.5): boolean {
+    return Math.random() < influence;
 }
 
 export function capitalize(str: string): string {
@@ -86,7 +86,11 @@ export function randomLanguage(): string {
     return pickFrom(sampleLanguages);
 }
 
+
 // randomizers
+export function randomAgency(): Agency {
+    return pickFrom(["Court", "USCIS"]);
+}
 
 export function randomAccreditations(): string[] {
     const numAccreditations = randInt(1,3);
@@ -99,6 +103,23 @@ export function randomRoles(): Role[] {
     const shuffled: Role[] = knuthShuffleShallow(roles);
     const numRoles = randInt(1, 3);
     return shuffled.slice(0, numRoles);
+}
+
+export function randomLanguageOptions(): LanguageOptions {
+    const languages = randomLanguageList();
+    const langOpt: LanguageOptions = {
+        read: [],
+        write: []
+    };
+
+    for (const lang of languages) {
+        const readOnly = randBool(0.3);
+        langOpt.read.push(lang);
+        if (!readOnly)
+            langOpt.write.push(lang);
+    }
+
+    return langOpt;
 }
 
 export function randomLanguageList(): string[] {
@@ -114,7 +135,7 @@ export function randomProgram(): Program {
 }
 
 export function randomExperience(): Experience {
-    const exps: Experience[] = ["beginner", "intermediate", "advanced", "expert"];
+    const exps: Experience[] = [0, 1, 2];
     return pickFrom(exps);
 }
 
@@ -148,7 +169,9 @@ export function randomInitials(): string {
 }
 
 export function randomParagraph(words: number): string {
-    if (words <= 0) {
+    if (words == 0) {
+        return "";
+    } else if (words < 0) {
         throw SyntaxError(
             "Illegal argument: number of words cannot be zero or negative!"
         );

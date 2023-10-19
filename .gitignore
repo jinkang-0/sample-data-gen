@@ -5,4 +5,4 @@ built/
 outputs/
 
 *.env
-**/.env.*
+**/.env.local
