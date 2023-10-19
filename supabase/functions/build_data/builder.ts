@@ -1,6 +1,6 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
 import { pickFrom, pickSomeFrom, randBool, randInt, randomAccreditations, randomCountry, randomDateFromNow, randomExperience, randomFirstName, randomInitials, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomProgram, randomRoles } from "./tools.ts";
-import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schemaTypes.ts";
+import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schema.ts";
 
 const randomUUID = v4.generate;
 
@@ -194,7 +194,7 @@ function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRe
         listing_id: listing.id,
         listing_type: listingType,
         form_response: {
-            whyInterested: randomParagraph(randInt(40, 60)),
+            interestReason: randomParagraph(randInt(40, 60)),
             interestType: pickSomeFrom(profile.roles, numToPick)
         },
         user_id: profile.user_id

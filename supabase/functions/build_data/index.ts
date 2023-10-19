@@ -4,7 +4,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { buildCases, buildInterests, buildProfiles } from "./builder.ts";
-import { CaseListing, Profile, Interest } from "./schemaTypes.ts";
+import { CaseListing, Profile, Interest } from "./schema.ts";
 
 const NUM_CASES = 100;
 const NUM_PROFILES = 180;

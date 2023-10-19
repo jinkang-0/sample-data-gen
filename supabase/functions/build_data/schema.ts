@@ -1,5 +1,4 @@
-import { UUID } from "crypto";
-
+export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 export type Experience = "beginner" | "intermediate" | "advanced" | "expert";
 export type Role = "attorney" | "translator" | "interpreter" | "researcher";
 export type Program = "CC" | "LDP" | "LOP" | "NQRP" | "FGLOP";
@@ -43,7 +42,7 @@ export type Interest = {
     listing_type: string;
     user_id: UUID;
     form_response: {
-        whyInterested: string;
+        interestReason: string;
         interestType: string[];
     };
 };

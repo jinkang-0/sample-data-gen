@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Experience, Program, Role } from "./schemaTypes.ts";
+import { Experience, Program, Role } from "./schema.ts";
 import json from "./sampleData.json" assert { type: "json" };
 
 const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
