@@ -81,15 +81,15 @@ export function buildInterests(
 
     if (types.cases) {
         listingOptions.push(listings.cases);
-        typeOptions.push("Case");
+        typeOptions.push(1);
     }
     if (types.limitedAssistances) {
         listingOptions.push(listings.limitedAssistances);
-        typeOptions.push("Limited Assistance");
+        typeOptions.push(2);
     }
     if (types.translationRequests) {
         listingOptions.push(listings.translationRequests);
-        typeOptions.push("Translation Request");
+        typeOptions.push(3);
     }
 
     const len = typeOptions.length;
@@ -191,7 +191,7 @@ function randomProfile(): Profile {
     return u;
 }
 
-function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: string, profile: Profile): Interest {
+function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: number, profile: Profile): Interest {
 
     const numToPick = randInt(1, profile.roles.length);
 

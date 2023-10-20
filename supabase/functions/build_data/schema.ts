@@ -48,7 +48,7 @@ export type Interest = {
     id: UUID;
     listing_id: UUID;
     user_id: UUID;
-    listing_type: string;
+    listing_type: number;
     form_response: {
         interestReason: string;
         interestType: string[];

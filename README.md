@@ -4,11 +4,8 @@ Takes advantage of Supabase Edge Functions to run functions with queries, using 
 
 Deploy a specific function with Supabase CLI:
 ```
-supabase functions deploy <FUNCTION_NAME>
+npx supabase functions deploy <FUNCTION_NAME> --project-ref=abcdefghijklmnopqrst
 ```
-or
-```
-npx supabase functions deploy <FUNCTION_NAME>
-```
+(replace the last bit with the part before .supabase.co in your supabase url)
 
 or deploy all functions at once by omitting the function name.
