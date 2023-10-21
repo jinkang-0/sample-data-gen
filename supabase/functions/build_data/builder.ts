@@ -1,6 +1,6 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
-import { pickFrom, pickSomeFrom, randBool, randInt, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomFirstName, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
-import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schema.ts";
+import { pickFrom, pickSomeFrom, randBool, randInt, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomLanguageList, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
+import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest, UserData } from "./schema.ts";
 
 const randomUUID = v4.generate;
 
@@ -37,11 +37,11 @@ export function buildTranslationRequests(numTranslationRequests: number): Transl
     return translationRequests;
 }
 
-export function buildProfiles(numProfiles: number): Profile[] {
+export function buildProfiles(usersData: UserData[]): Profile[] {
     const profiles: Profile[] = [];
 
-    for (let i = 0; i < numProfiles; i++) {
-        profiles.push(randomProfile());
+    for (const user of usersData) {
+        profiles.push(randomProfile(user));
     }
 
     return profiles;
@@ -170,11 +170,11 @@ function randomTranslationRequest(): TranslationRequest {
     return t;
 }
 
-function randomProfile(): Profile {
+function randomProfile(userData: UserData): Profile {
     const u: Profile = {
-        user_id: randomUUID(),
-        first_name: randomFirstName(),
-        last_name: randomLastName(),
+        user_id: userData.id,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
         roles: randomRoles(),
         languages: randomLanguageOptions(),
         hours_per_month: randInt(40, 240),

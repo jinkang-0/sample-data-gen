@@ -8,6 +8,13 @@ export type LanguageOptions = {
     write: string[];
 };
 
+export type UserData = {
+    id: UUID;
+    first_name: string;
+    last_name: string;
+    email: string;
+};
+
 export type CaseListing = {
     id: UUID;
     title: string;

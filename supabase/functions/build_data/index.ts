@@ -29,15 +29,20 @@ Deno.serve(async (req) => {
         // get params
         const body = await req.json();
         const NUM_CASES = (body.numCases && parseInt(body.numCases)) || 100;
-        const NUM_PROFILES = (body.numProfiles && parseInt(body.numProfiles)) || 180;
         const NUM_INTERESTS = (body.numInterests && parseInt(body.numInterests)) || 6000;
+        // const NUM_PROFILES = (body.numProfiles && parseInt(body.numProfiles)) || 180;
+        // num profiles now dependent on number of users in test_users table
 
-        if (NUM_CASES < 0 || NUM_PROFILES < 0 || NUM_INTERESTS < 0)
+        if (NUM_CASES < 0 || NUM_INTERESTS < 0)
             throw new Error("numCases, numProfiles, or numInterests cannot be negative!");
+
+        // get users
+        const { data: usersData, error: readUsersError } = await supabase.from("test_users").select();
+        if (readUsersError) throw readUsersError;
 
         // build data
         const cases = buildCases(NUM_CASES);
-        const profiles = buildProfiles(NUM_PROFILES);
+        const profiles = buildProfiles(usersData);
         const interests = buildInterests(
             NUM_INTERESTS,
             {
@@ -62,8 +67,7 @@ Deno.serve(async (req) => {
             await insertTo("cases", cases);
         if (NUM_INTERESTS > 0)
             await insertTo("interests", interests);
-        if (NUM_PROFILES > 0)
-            await insertTo("profiles", profiles);
+        await insertTo("profiles", profiles);
 
         console.log("Successfully added data!");
 
