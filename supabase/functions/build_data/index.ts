@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
         const NUM_PROFILES = (body.numProfiles && parseInt(body.numProfiles)) || 180;
         const NUM_INTERESTS = (body.numInterests && parseInt(body.numInterests)) || 6000;
 
+        if (NUM_CASES < 0 || NUM_PROFILES < 0 || NUM_INTERESTS < 0)
+            throw new Error("numCases, numProfiles, or numInterests cannot be negative!");
+
         // build data
         const cases = buildCases(NUM_CASES);
         const profiles = buildProfiles(NUM_PROFILES);
@@ -55,9 +58,12 @@ Deno.serve(async (req) => {
             if (error) throw error;
         };
 
-        await insertTo("cases", cases);
-        await insertTo("interests", interests);
-        await insertTo("profiles", profiles);
+        if (NUM_CASES > 0)
+            await insertTo("cases", cases);
+        if (NUM_INTERESTS > 0)
+            await insertTo("interests", interests);
+        if (NUM_PROFILES > 0)
+            await insertTo("profiles", profiles);
 
         console.log("Successfully added data!");
 

@@ -23,7 +23,7 @@ export type CaseListing = {
     needs_attorney: boolean;
     needs_interpreter: boolean;
     upcoming_date: string;
-    relief_sought: Agency;
+    relief_sought: string;
     active: boolean;
 };
 

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Experience, Program, Role, Agency, LanguageOptions } from "./schema.ts";
-import json from "./sampleData.json" assert { type: "json" };
+import json from "../sampleData.json" assert { type: "json" };
 
 const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
 
@@ -172,8 +172,8 @@ export function randomParagraph(words: number): string {
     if (words == 0) {
         return "";
     } else if (words < 0) {
-        throw SyntaxError(
-            "Illegal argument: number of words cannot be zero or negative!"
+        throw Error(
+            "Illegal argument: number of words cannot be negative!"
         );
     }
 

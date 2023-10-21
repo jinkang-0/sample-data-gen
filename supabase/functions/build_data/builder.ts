@@ -1,5 +1,5 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
-import { pickFrom, pickSomeFrom, randBool, randInt, randomAgency, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomFirstName, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
+import { pickFrom, pickSomeFrom, randBool, randInt, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomFirstName, randomLanguageList, randomLastName, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
 import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest } from "./schema.ts";
 
 const randomUUID = v4.generate;
@@ -136,7 +136,7 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
         num_months: randInt(1, 5),
         in_court: randBool(),
         needs_attorney: randBool(),
-        relief_sought: randomAgency(),
+        relief_sought: randomParagraph(randInt(5, 20)),
         active: randBool(0.7)
     };
 
