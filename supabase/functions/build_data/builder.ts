@@ -1,27 +1,39 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
-import { pickFrom, pickSomeFrom, randBool, randInt, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomLanguageList, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
-import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest, UserData } from "./schema.ts";
+import { pickFrom, randBool, randInt, randomCountry, randomDateFromNow, randomExperience, randomGibberish, randomIsoCode, randomIsoList, randomLocation, randomNumString, randomParagraph, randomRoleEnum } from "./tools.ts";
+import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest, UserData, ListingTypeEnum, RoleEnum, UUID, CaseLanguage, Relief, ProfileLanguage, Role } from "./schema.ts";
 
 const randomUUID = v4.generate;
 
 // export builders
-export function buildCases(numCases: number): CaseListing[] {
+export function buildCases(numCases: number): { cases: CaseListing[], languages: CaseLanguage[], reliefs: Relief[] } {
     const cases: CaseListing[] = [];
-    const caseLegalServerIds = new Set<number>();    
+    const languages: CaseLanguage[] = [];
+    const reliefs: Relief[] = [];
+    const caseLegalServerIds = new Set<number>();
     
     for (let i = 0; i < numCases; i++) {
-        cases.push(randomCaseListing(caseLegalServerIds));
+        const c = randomCaseListing(caseLegalServerIds);
+        cases.push(c);
+
+        const numLangs = randInt(1, 3);
+        for (let j = 0; j < numLangs; j++) {
+            languages.push(randomCaseLanguage(c.id));
+        }
+
+        const numReliefs = randInt(1, 4);
+        for (let j = 0; j < numReliefs; j++) {
+            reliefs.push(randomRelief(c.id));
+        }
     }
 
-    return cases;
+    return { cases, languages, reliefs };
 }
 
-export function buildLimitedAssistances(numLimitedAssistances: number, cases: CaseListing[]): LimitedAssistance[] {
+export function buildLimitedAssistances(numLimitedAssistances: number): LimitedAssistance[] {
     const limitedAssistances: LimitedAssistance[] = [];
 
     for (let i = 0; i < numLimitedAssistances; i++) {
-        const c = pickFrom(cases);
-        limitedAssistances.push(randomLimitedAssistance(c));
+        limitedAssistances.push(randomLimitedAssistance());
     }
 
     return limitedAssistances
@@ -37,14 +49,27 @@ export function buildTranslationRequests(numTranslationRequests: number): Transl
     return translationRequests;
 }
 
-export function buildProfiles(usersData: UserData[]): Profile[] {
+export function buildProfiles(usersData: UserData[]): { profiles: Profile[], languages: ProfileLanguage[], roles: Role[] } {
     const profiles: Profile[] = [];
+    const languages: ProfileLanguage[] = [];
+    const roles: Role[] = [];
 
     for (const user of usersData) {
-        profiles.push(randomProfile(user));
+        const p = randomProfile(user);
+        profiles.push(p);
+
+        const numLangs = randInt(1, 3);
+        for (let j = 0; j < numLangs; j++) {
+            languages.push(randomProfileLanguage(p.user_id));
+        }
+
+        const numRoles = randBool(0.7) ? 1 : 2;
+        for (let j = 0; j < numRoles; j++) {
+            roles.push(randomProfileRole(p.user_id));
+        }
     }
 
-    return profiles;
+    return { profiles, languages, roles };
 }
 
 export function buildInterests(
@@ -61,6 +86,8 @@ export function buildInterests(
     },
     profiles: Profile[]
 ): Interest[] {
+    if (profiles.length === 0)
+        return [];
 
     const interests: Interest[] = [];
 
@@ -77,19 +104,19 @@ export function buildInterests(
 
     // set config
     const listingOptions = [];
-    const typeOptions = [];
+    const typeOptions: ListingTypeEnum[] = [];
 
     if (types.cases) {
         listingOptions.push(listings.cases);
-        typeOptions.push(1);
+        typeOptions.push("Case");
     }
     if (types.limitedAssistances) {
         listingOptions.push(listings.limitedAssistances);
-        typeOptions.push(2);
+        typeOptions.push("Limited Assistance");
     }
     if (types.translationRequests) {
         listingOptions.push(listings.translationRequests);
-        typeOptions.push(3);
+        typeOptions.push("Translation Request");
     }
 
     const len = typeOptions.length;
@@ -111,7 +138,26 @@ export function buildInterests(
 
 
 
-// helper functions
+// helper functions for join table rows
+function randomCaseLanguage(case_id: UUID): CaseLanguage {
+    return { listing_id: case_id, iso_code: randomIsoCode() };
+}
+
+function randomRelief(case_id: UUID): Relief {
+    return { listing_id: case_id, relief_code: randomGibberish() };
+}
+
+function randomProfileLanguage(user_id: UUID): ProfileLanguage {
+    return { user_id, iso_code: randomIsoCode(), can_read: randBool(), can_write: randBool() }
+}
+
+function randomProfileRole(user_id: UUID): Role {
+    return { user_id, role: randomRoleEnum() };
+}
+
+
+
+// helper functions for table rows
 function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     const randSummaryLength = randInt(40, 60);
 
@@ -122,12 +168,11 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     legalServerSet.add(legalServerId);
 
     const c: CaseListing = {
-        id: randomUUID(),
+        id: randomUUID() as UUID,
         legal_server_id: legalServerId,
         country: randomCountry(),
         upcoming_date: randomDateFromNow(30, 180),
         is_remote: randBool(),
-        languages: randomLanguageList(),
         client_location: randomLocation(),
         summary: randomParagraph(randSummaryLength),
         needs_interpreter: randBool(),
@@ -136,18 +181,16 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
         num_months: randInt(1, 5),
         in_court: randBool(),
         needs_attorney: randBool(),
-        relief_sought: randomParagraph(randInt(5, 20)),
-        active: randBool(0.7)
     };
 
     return c;
 }
 
-function randomLimitedAssistance(caseListing: CaseListing): LimitedAssistance {
+function randomLimitedAssistance(): LimitedAssistance {
     const r: LimitedAssistance = {
-        id: randomUUID(),
-        summary: caseListing.summary,
-        languages: caseListing.languages,
+        id: randomUUID() as UUID,
+        summary: randomParagraph(randInt(5, 30)),
+        languages: randomIsoList(),
         country: randomCountry(),
         experience_level: randomExperience(),
         deadline: randomDateFromNow(21, 180),
@@ -161,8 +204,8 @@ function randomTranslationRequest(): TranslationRequest {
     const randSummaryLength = randInt(40, 60);
 
     const t: TranslationRequest = {
-        id: randomUUID(),
-        languages: randomLanguageList(),
+        id: randomUUID() as UUID,
+        languages: randomIsoList(),
         summary: randomParagraph(randSummaryLength),
         interest_ids: []
     };
@@ -175,14 +218,10 @@ function randomProfile(userData: UserData): Profile {
         user_id: userData.id,
         first_name: userData.first_name,
         last_name: userData.last_name,
-        roles: randomRoles(),
-        languages: randomLanguageOptions(),
         hours_per_month: randInt(40, 240),
         immigration_law_experience: randomExperience(),
-        bar_number: randomNumString(6),
+        bar_number: randomNumString(6).toString(),
         start_date: randomDateFromNow(5, 14),
-        interest_ids: [],
-        status: randInt(0, 3),
         availability_description: randomParagraph(randInt(0, 30)),
         eoir_registered: randBool(),
         location: randomLocation()
@@ -191,22 +230,24 @@ function randomProfile(userData: UserData): Profile {
     return u;
 }
 
-function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: number, profile: Profile): Interest {
+function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: ListingTypeEnum, profile: Profile): Interest {
 
-    const numToPick = randInt(1, profile.roles.length);
+    const roles: RoleEnum[] = (listingType === 'Case')
+        ? pickFrom(["Attorney", "Interpreter"])
+        : (listingType === "Limited Assistance")
+            ? ["Research Fellow"]
+            : ["Translator"];
 
     const it: Interest = {
-        id: randomUUID(),
         listing_id: listing.id,
+        user_id: profile.user_id,
         listing_type: listingType,
         form_response: {
             interestReason: randomParagraph(randInt(40, 60)),
-            interestType: pickSomeFrom(profile.roles, numToPick)
-        },
-        user_id: profile.user_id
+            rolesInterested: roles,
+            start_date: randomDateFromNow(0, 30)
+        }
     }
-
-    profile.interest_ids.push(it.id);
 
     return it;
 }

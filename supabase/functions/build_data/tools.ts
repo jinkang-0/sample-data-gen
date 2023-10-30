@@ -1,8 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
-import { Experience, Program, Role, Agency, LanguageOptions } from "./schema.ts";
+import { iso6393 } from "https://cdn.skypack.dev/iso-639-3@3?dts";
+import { ExperienceEnum, RoleEnum, AgencyEnum } from "./schema.ts";
 import json from "../sampleData.json" assert { type: "json" };
 
-const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleLanguages, sampleStates, sampleStreets, sampleAccreditations } = json;
+const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleStates, sampleStreets, sampleAccreditations } = json;
+
+const LIVING_LANGUAGES = iso6393.filter(l => l.type === 'living');
+const LIVING_ISO_CODES = LIVING_LANGUAGES.map(l => l.iso6393);
+const LIVING_LANGUAGE_NAMES = LIVING_LANGUAGES.map(l => l.name);
 
 // helper functions
 
@@ -28,8 +33,8 @@ export function randInt(min: number, max: number): number {
     return Math.floor(randFloat(min, max));
 }
 
-export function randBool(influence=0.5): boolean {
-    return Math.random() < influence;
+export function randBool(chance=0.5): boolean {
+    return Math.random() < chance;
 }
 
 export function capitalize(str: string): string {
@@ -82,13 +87,22 @@ export function randomStreet(): string {
     return pickFrom(sampleStreets);
 }
 
-export function randomLanguage(): string {
-    return pickFrom(sampleLanguages);
+export function randomIsoCode(): string {
+    return pickFrom(LIVING_ISO_CODES);
+}
+
+export function randomGibberish(): string {
+    return pickFrom(gibberish);
+}
+
+export function randomRoleEnum(): RoleEnum {
+    const roles: RoleEnum[] = ["Attorney", "Interpreter", "Research Fellow", "Translator"];
+    return pickFrom(roles);
 }
 
 
 // randomizers
-export function randomAgency(): Agency {
+export function randomAgency(): AgencyEnum {
     return pickFrom(["Court", "USCIS"]);
 }
 
@@ -98,44 +112,27 @@ export function randomAccreditations(): string[] {
     return shuffled.slice(0, numAccreditations);
 }
 
-export function randomRoles(): Role[] {
-    const roles: Role[] = ["attorney", "translator", "interpreter", "researcher"];
-    const shuffled: Role[] = knuthShuffleShallow(roles);
+export function randomRoles(): RoleEnum[] {
+    const roles: RoleEnum[] = ["Attorney", "Translator", "Interpreter", "Research Fellow"];
+    const shuffled: RoleEnum[] = knuthShuffleShallow(roles);
     const numRoles = randInt(1, 3);
     return shuffled.slice(0, numRoles);
 }
 
-export function randomLanguageOptions(): LanguageOptions {
-    const languages = randomLanguageList();
-    const langOpt: LanguageOptions = {
-        read: [],
-        write: []
-    };
-
-    for (const lang of languages) {
-        const readOnly = randBool(0.3);
-        langOpt.read.push(lang);
-        if (!readOnly)
-            langOpt.write.push(lang);
-    }
-
-    return langOpt;
+export function randomIsoList(min=1, max=4): string[] {
+    const numLangs = randInt(min, max);
+    const shuffled = knuthShuffleShallow(LIVING_ISO_CODES);
+    return shuffled.slice(0, numLangs);
 }
 
-export function randomLanguageList(): string[] {
-    const numLangs = randInt(1, 4);
-    const shuffled = knuthShuffleShallow(sampleLanguages);
-    const langs = shuffled.slice(0, numLangs);
-    return langs;
+export function randomLanguageNames(min=1, max=4): string[] {
+    const numLangs = randInt(min, max);
+    const shuffled = knuthShuffleShallow(LIVING_LANGUAGE_NAMES);
+    return shuffled.slice(0, numLangs);
 }
 
-export function randomProgram(): Program {
-    const programs: Program[] = ["CC", "FGLOP", "LDP", "LOP", "NQRP"];
-    return pickFrom(programs);
-}
-
-export function randomExperience(): Experience {
-    const exps: Experience[] = [0, 1, 2];
+export function randomExperience(): ExperienceEnum {
+    const exps: ExperienceEnum[] = ["No Experience", "One Experience", "Multiple Experiences"];
     return pickFrom(exps);
 }
 
