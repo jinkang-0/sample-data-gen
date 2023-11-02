@@ -1,9 +1,19 @@
 // table fields
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
-export type ExperienceEnum = "No Experience" | "One Experience" | "Multiple Experiences";
-export type RoleEnum = "Attorney" | "Interpreter" | "Research Fellow" | "Translator";
+export type ExperienceEnum = "LOW" | "MEDIUM" | "HIGH";
+
+export type RoleEnum =
+    | "Attorney"
+    | "Interpreter"
+    | "Research Fellow"
+    | "Translator";
+
 export type AgencyEnum = "Court" | "USCIS";
-export type ListingTypeEnum = "Case" | "Limited Assistance" | "Translation Request";
+
+export type ListingTypeEnum =
+    | "Case"
+    | "Limited Assistance"
+    | "Translation Request";
 
 // misc
 export type UserData = {

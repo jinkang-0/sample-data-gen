@@ -3,11 +3,20 @@ import { iso6393 } from "https://cdn.skypack.dev/iso-639-3@3?dts";
 import { ExperienceEnum, RoleEnum, AgencyEnum } from "./schema.ts";
 import json from "../sampleData.json" assert { type: "json" };
 
-const { gibberish, sampleFirstNames, sampleLastNames, sampleCities, sampleCountries, sampleStates, sampleStreets, sampleAccreditations } = json;
+const {
+    gibberish,
+    sampleFirstNames,
+    sampleLastNames,
+    sampleCities,
+    sampleCountries,
+    sampleStates,
+    sampleStreets,
+    sampleAccreditations
+} = json;
 
-const LIVING_LANGUAGES = iso6393.filter(l => l.type === 'living');
-const LIVING_ISO_CODES = LIVING_LANGUAGES.map(l => l.iso6393);
-const LIVING_LANGUAGE_NAMES = LIVING_LANGUAGES.map(l => l.name);
+const LIVING_LANGUAGES = iso6393.filter((l) => l.type === "living");
+const LIVING_ISO_CODES = LIVING_LANGUAGES.map((l) => l.iso6393);
+const LIVING_LANGUAGE_NAMES = LIVING_LANGUAGES.map((l) => l.name);
 
 // helper functions
 
@@ -33,7 +42,7 @@ export function randInt(min: number, max: number): number {
     return Math.floor(randFloat(min, max));
 }
 
-export function randBool(chance=0.5): boolean {
+export function randBool(chance = 0.5): boolean {
     return Math.random() < chance;
 }
 
@@ -50,9 +59,9 @@ export function randChar(): string {
 // DOES NOT deep copy
 export function knuthShuffleShallow(arr: Array<any>): Array<any> {
     const ans = [...arr];
-    
+
     for (let i = ans.length - 1; i > 0; i--) {
-        const j = randInt(0, i+1);
+        const j = randInt(0, i + 1);
         const temp = ans[i];
         ans[i] = ans[j];
         ans[j] = temp;
@@ -96,10 +105,14 @@ export function randomGibberish(): string {
 }
 
 export function randomRoleEnum(): RoleEnum {
-    const roles: RoleEnum[] = ["Attorney", "Interpreter", "Research Fellow", "Translator"];
+    const roles: RoleEnum[] = [
+        "Attorney",
+        "Interpreter",
+        "Research Fellow",
+        "Translator"
+    ];
     return pickFrom(roles);
 }
-
 
 // randomizers
 export function randomAgency(): AgencyEnum {
@@ -107,32 +120,37 @@ export function randomAgency(): AgencyEnum {
 }
 
 export function randomAccreditations(): string[] {
-    const numAccreditations = randInt(1,3);
+    const numAccreditations = randInt(1, 3);
     const shuffled = knuthShuffleShallow(sampleAccreditations);
     return shuffled.slice(0, numAccreditations);
 }
 
 export function randomRoles(): RoleEnum[] {
-    const roles: RoleEnum[] = ["Attorney", "Translator", "Interpreter", "Research Fellow"];
+    const roles: RoleEnum[] = [
+        "Attorney",
+        "Translator",
+        "Interpreter",
+        "Research Fellow"
+    ];
     const shuffled: RoleEnum[] = knuthShuffleShallow(roles);
     const numRoles = randInt(1, 3);
     return shuffled.slice(0, numRoles);
 }
 
-export function randomIsoList(min=1, max=4): string[] {
+export function randomIsoList(min = 1, max = 4): string[] {
     const numLangs = randInt(min, max);
     const shuffled = knuthShuffleShallow(LIVING_ISO_CODES);
     return shuffled.slice(0, numLangs);
 }
 
-export function randomLanguageNames(min=1, max=4): string[] {
+export function randomLanguageNames(min = 1, max = 4): string[] {
     const numLangs = randInt(min, max);
     const shuffled = knuthShuffleShallow(LIVING_LANGUAGE_NAMES);
     return shuffled.slice(0, numLangs);
 }
 
 export function randomExperience(): ExperienceEnum {
-    const exps: ExperienceEnum[] = ["No Experience", "One Experience", "Multiple Experiences"];
+    const exps: ExperienceEnum[] = ["LOW", "MEDIUM", "HIGH"];
     return pickFrom(exps);
 }
 
@@ -169,9 +187,7 @@ export function randomParagraph(words: number): string {
     if (words == 0) {
         return "";
     } else if (words < 0) {
-        throw Error(
-            "Illegal argument: number of words cannot be negative!"
-        );
+        throw Error("Illegal argument: number of words cannot be negative!");
     }
 
     // setup
@@ -219,9 +235,13 @@ export function randomParagraph(words: number): string {
 export function randomDateFromNow(minDays: number, maxDays: number): string {
     // catch illegal args
     if (minDays <= 0) {
-        throw new SyntaxError("Illegal arguments: min cannot be zero or negative!");
+        throw new SyntaxError(
+            "Illegal arguments: min cannot be zero or negative!"
+        );
     } else if (minDays > maxDays) {
-        throw new SyntaxError("Illegal arguments: min cannot be greater than max!");
+        throw new SyntaxError(
+            "Illegal arguments: min cannot be greater than max!"
+        );
     }
 
     // find offset and parse
@@ -232,15 +252,14 @@ export function randomDateFromNow(minDays: number, maxDays: number): string {
 
     const future = new Date(nowInMs + offsetInMs);
     const futureYear = future.getFullYear();
-    const futureMonth = (future.getMonth() + 1).toString().padStart(2, '0');
-    const futureDay = future.getDate().toString().padStart(2, '0');
-    const futureHour = future.getHours().toString().padStart(2, '0');
-    const futureMinute = future.getMinutes().toString().padStart(2, '0');
-    const futureSeconds = future.getSeconds().toString().padStart(2, '0');
+    const futureMonth = (future.getMonth() + 1).toString().padStart(2, "0");
+    const futureDay = future.getDate().toString().padStart(2, "0");
+    const futureHour = future.getHours().toString().padStart(2, "0");
+    const futureMinute = future.getMinutes().toString().padStart(2, "0");
+    const futureSeconds = future.getSeconds().toString().padStart(2, "0");
 
-    const plusOrMinus = (randBool())? "-" : "+";
+    const plusOrMinus = randBool() ? "-" : "+";
     const tzOffset = randInt(0, 13);
 
     return `${futureYear}-${futureMonth}-${futureDay} ${futureHour}:${futureMinute}:${futureSeconds} ${plusOrMinus}${tzOffset}:00`;
 }
-
