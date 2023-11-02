@@ -158,15 +158,15 @@ export function buildInterests(
 
     if (types.cases) {
         listingOptions.push(listings.cases);
-        typeOptions.push("Case");
+        typeOptions.push("CASE");
     }
     if (types.limitedAssistances) {
         listingOptions.push(listings.limitedAssistances);
-        typeOptions.push("Limited Assistance");
+        typeOptions.push("LIMITED_ASSISTANCE");
     }
     if (types.translationRequests) {
         listingOptions.push(listings.translationRequests);
-        typeOptions.push("Translation Request");
+        typeOptions.push("TRANSLATION_REQUEST");
     }
 
     const len = typeOptions.length;
@@ -288,11 +288,11 @@ function randomInterest(
     profile: Profile
 ): Interest {
     const roles: RoleEnum[] =
-        listingType === "Case"
-            ? pickFrom(["Attorney", "Interpreter"])
-            : listingType === "Limited Assistance"
-            ? ["Research Fellow"]
-            : ["Translator"];
+        listingType === "CASE"
+            ? pickFrom(["ATTORNEY", "INTERPRETER"])
+            : listingType === "LIMITED_ASSISTANCE"
+            ? ["LEGAL_FELLOW"]
+            : ["TRANSLATOR"];
 
     const it: Interest = {
         listing_id: listing.id,

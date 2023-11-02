@@ -17,9 +17,9 @@ export type AgencyEnum =
     | "USCIS";
 
 export type ListingTypeEnum =
-    | "Case"
-    | "Limited Assistance"
-    | "Translation Request";
+    | "CASE"
+    | "LIMITED_ASSISTANCE"
+    | "TRANSLATION_REQUEST";
 
 // misc
 export type UserData = {
