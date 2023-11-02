@@ -1,14 +1,20 @@
 // table fields
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+
 export type ExperienceEnum = "LOW" | "MEDIUM" | "HIGH";
 
 export type RoleEnum =
-    | "Attorney"
-    | "Interpreter"
-    | "Research Fellow"
-    | "Translator";
+    | "ATTORNEY"
+    | "INTERPRETER"
+    | "LEGAL_FELLOW"
+    | "TRANSLATOR";
 
-export type AgencyEnum = "Court" | "USCIS";
+export type AgencyEnum =
+    | "9TH_CIRCUIT"
+    | "BIA"
+    | "IMMIGRATION_COURT"
+    | "IMMIGRATION_ENFORCEMENT"
+    | "USCIS";
 
 export type ListingTypeEnum =
     | "Case"
@@ -57,10 +63,10 @@ export type CaseListing = {
     hours_per_month?: number;
     num_months?: number;
     is_remote?: boolean;
-    in_court?: boolean;
     needs_attorney?: boolean;
     needs_interpreter?: boolean;
     upcoming_date?: string;
+    adjudicating_agency: AgencyEnum;
 };
 
 export type Interest = {

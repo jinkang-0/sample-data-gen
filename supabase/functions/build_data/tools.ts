@@ -106,17 +106,25 @@ export function randomGibberish(): string {
 
 export function randomRoleEnum(): RoleEnum {
     const roles: RoleEnum[] = [
-        "Attorney",
-        "Interpreter",
-        "Research Fellow",
-        "Translator"
+        "ATTORNEY",
+        "INTERPRETER",
+        "LEGAL_FELLOW",
+        "TRANSLATOR"
     ];
     return pickFrom(roles);
 }
 
 // randomizers
 export function randomAgency(): AgencyEnum {
-    return pickFrom(["Court", "USCIS"]);
+    const agencies: AgencyEnum[] = [
+        "9TH_CIRCUIT",
+        "9TH_CIRCUIT",
+        "BIA",
+        "IMMIGRATION_COURT",
+        "IMMIGRATION_ENFORCEMENT",
+        "USCIS"
+    ];
+    return pickFrom(agencies);
 }
 
 export function randomAccreditations(): string[] {
@@ -127,10 +135,10 @@ export function randomAccreditations(): string[] {
 
 export function randomRoles(): RoleEnum[] {
     const roles: RoleEnum[] = [
-        "Attorney",
-        "Translator",
-        "Interpreter",
-        "Research Fellow"
+        "ATTORNEY",
+        "INTERPRETER",
+        "LEGAL_FELLOW",
+        "TRANSLATOR"
     ];
     const shuffled: RoleEnum[] = knuthShuffleShallow(roles);
     const numRoles = randInt(1, 3);
