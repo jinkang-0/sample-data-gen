@@ -121,7 +121,7 @@ export function randomAgency(): AgencyEnum {
         "9TH_CIRCUIT",
         "BIA",
         "IMMIGRATION_COURT",
-        "IMMIGRATION_ENFORCEMENT",
+        "ICE",
         "USCIS"
     ];
     return pickFrom(agencies);

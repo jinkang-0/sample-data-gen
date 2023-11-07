@@ -13,7 +13,7 @@ export type AgencyEnum =
     | "9TH_CIRCUIT"
     | "BIA"
     | "IMMIGRATION_COURT"
-    | "IMMIGRATION_ENFORCEMENT"
+    | "ICE"
     | "USCIS";
 
 export type ListingTypeEnum =
@@ -66,6 +66,7 @@ export type CaseListing = {
     needs_attorney?: boolean;
     needs_interpreter?: boolean;
     upcoming_date?: string;
+    experience_needed: ExperienceEnum;
     adjudicating_agency: AgencyEnum;
 };
 
@@ -84,8 +85,7 @@ export type Profile = {
     user_id: UUID;
     first_name: string;
     last_name: string;
-    preferred_first_name?: string;
-    location: string; // city, ST
+    location: string;
     hours_per_month: number;
     immigration_law_experience: ExperienceEnum;
     bar_number?: string;

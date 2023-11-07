@@ -232,7 +232,8 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
         title: randomParagraph(randInt(2, 8)),
         num_months: randInt(1, 5),
         adjudicating_agency: randomAgency(),
-        needs_attorney: randBool()
+        needs_attorney: randBool(),
+        experience_needed: randomExperience()
     };
 
     return c;
