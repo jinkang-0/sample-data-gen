@@ -4,7 +4,15 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { buildCases, buildInterests, buildProfiles } from "./builder.ts";
-import { CaseListing, Profile, Interest, CaseLanguage, Relief, ProfileLanguage, Role } from "./schema.ts";
+import {
+    CaseListing,
+    Profile,
+    Interest,
+    CaseLanguage,
+    Relief,
+    ProfileLanguage,
+    Role
+} from "./schema.ts";
 
 Deno.serve(async (req) => {
     try {
@@ -29,18 +37,36 @@ Deno.serve(async (req) => {
         // get params
         const body = await req.json();
         const NUM_CASES = (body.numCases && parseInt(body.numCases)) || 100;
-        const NUM_INTERESTS = (body.numInterests && parseInt(body.numInterests)) || 6000;
+        const NUM_INTERESTS =
+            (body.numInterests && parseInt(body.numInterests)) || 6000;
 
         if (NUM_CASES < 0 || NUM_INTERESTS < 0)
             throw new Error("numCases or numInterests cannot be negative!");
 
+        if (NUM_CASES > 1000) throw new Error("numCases cannot exceed 1000!");
+
         // get users
-        const { data: usersData, error: readUsersError } = await supabase.from("test_users").select();
+        const { data: usersData, error: readUsersError } = await supabase
+            .from("test_users")
+            .select();
         if (readUsersError) throw readUsersError;
 
+        if (NUM_INTERESTS > usersData.length * NUM_CASES)
+            throw new Error("numInterests cannot exceed numUsers x numCases!");
+
         // build data
-        const { cases, languages: caseLanguages, reliefs } = buildCases(NUM_CASES);
-        const { profiles, languages: profileLanguages, roles } = buildProfiles(usersData);
+        const {
+            cases,
+            languages: caseLanguages,
+            reliefs
+        } = buildCases(NUM_CASES);
+
+        const {
+            profiles,
+            languages: profileLanguages,
+            roles
+        } = buildProfiles(usersData);
+
         const interests = buildInterests(
             NUM_INTERESTS,
             {
@@ -55,7 +81,14 @@ Deno.serve(async (req) => {
         // insert data
         const insertTo = async (
             table: string,
-            data: CaseListing[] | Profile[] | Interest[] | CaseLanguage[] | Relief[] | ProfileLanguage[] | Role[]
+            data:
+                | CaseListing[]
+                | Profile[]
+                | Interest[]
+                | CaseLanguage[]
+                | Relief[]
+                | ProfileLanguage[]
+                | Role[]
         ) => {
             const { error } = await supabase.from(table).insert(data);
             if (error) throw error;
@@ -63,18 +96,26 @@ Deno.serve(async (req) => {
 
         if (NUM_CASES > 0) {
             await insertTo("cases", cases);
-            await insertTo("cases-languages", caseLanguages);
-            await insertTo("reliefs", reliefs);
+            await Promise.all([
+                insertTo("cases-languages", caseLanguages),
+                insertTo("reliefs", reliefs)
+            ]);
+            console.log("CASES-RELATED TABLES SET!");
         }
 
         if (usersData.length > 0) {
             await insertTo("profiles", profiles);
-            await insertTo("profiles-languages", profileLanguages);
-            await insertTo("roles", roles);
+            await Promise.all([
+                insertTo("profiles-languages", profileLanguages),
+                insertTo("roles", roles)
+            ]);
+            console.log("PROFILES-RELATED TABLES SET!");
         }
 
-        if (NUM_INTERESTS > 0)
+        if (NUM_INTERESTS > 0) {
             await insertTo("interests", interests);
+            console.log("INTEREST-RELATED TABLES SET!");
+        }
 
         console.log("Successfully added data!");
 
