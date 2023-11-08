@@ -29,15 +29,21 @@ Deno.serve(async (req) => {
 
     // purge original data
     const nullUUID = randomUUID();
-    const deleteFrom = async (table: string, pickColumn: string) => {
-        const { error } = await supabase.from(table).delete().neq(pickColumn, nullUUID);
+    const deleteFrom = async (table: string, basedOnColumn: string) => {
+        const { error } = await supabase.from(table).delete().neq(basedOnColumn, nullUUID);
         if (error)
             throw new Error(`Error deleting ${table}: ${error.message}`);
     }
 
     await deleteFrom("cases", "id");
-    await deleteFrom("interests", "id");
+    await deleteFrom("cases-languages", "listing_id");
+    await deleteFrom("reliefs", "listing_id");
+
     await deleteFrom("profiles", "user_id");
+    await deleteFrom("profiles-languages", "user_id");
+    await deleteFrom("roles", "user_id");
+
+    await deleteFrom("interests", "user_id");
 
     console.log("Successfully purged data!");
 

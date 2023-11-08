@@ -1,35 +1,82 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
-import { pickFrom, pickSomeFrom, randBool, randInt, randomCountry, randomLanguageOptions, randomDateFromNow, randomExperience, randomLanguageList, randomLocation, randomNumString, randomParagraph, randomRoles } from "./tools.ts";
-import { CaseListing, LimitedAssistance, TranslationRequest, Profile, Interest, UserData } from "./schema.ts";
+import {
+    pickFrom,
+    pickSomeFrom,
+    randBool,
+    randInt,
+    randomAgency,
+    randomCountry,
+    randomDateFromNow,
+    randomExperience,
+    randomIsoCodeList,
+    randomIsoList,
+    randomLocation,
+    randomNumString,
+    randomParagraph,
+    randomReliefCode
+} from "./tools.ts";
+import {
+    CaseListing,
+    LimitedAssistance,
+    TranslationRequest,
+    Profile,
+    Interest,
+    UserData,
+    ListingTypeEnum,
+    RoleEnum,
+    UUID,
+    CaseLanguage,
+    Relief,
+    ProfileLanguage,
+    Role
+} from "./schema.ts";
 
 const randomUUID = v4.generate;
 
 // export builders
-export function buildCases(numCases: number): CaseListing[] {
+export function buildCases(numCases: number): {
+    cases: CaseListing[];
+    languages: CaseLanguage[];
+    reliefs: Relief[];
+} {
     const cases: CaseListing[] = [];
-    const caseLegalServerIds = new Set<number>();    
-    
+    const languages: CaseLanguage[] = [];
+    const reliefs: Relief[] = [];
+    const caseLegalServerIds = new Set<number>();
+
     for (let i = 0; i < numCases; i++) {
-        cases.push(randomCaseListing(caseLegalServerIds));
+        const c = randomCaseListing(caseLegalServerIds);
+        cases.push(c);
+
+        const numLangs = randInt(1, 3);
+        languages.concat(randomListingLanguages(c.id, numLangs));
+
+        const numReliefs = randInt(1, 4);
+        for (let j = 0; j < numReliefs; j++) {
+            reliefs.push(randomRelief(c.id));
+        }
     }
 
-    return cases;
+    return { cases, languages, reliefs };
 }
 
-export function buildLimitedAssistances(numLimitedAssistances: number, cases: CaseListing[]): LimitedAssistance[] {
+export function buildLimitedAssistances(
+    numLimitedAssistances: number
+): LimitedAssistance[] {
     const limitedAssistances: LimitedAssistance[] = [];
 
     for (let i = 0; i < numLimitedAssistances; i++) {
-        const c = pickFrom(cases);
-        limitedAssistances.push(randomLimitedAssistance(c));
+        limitedAssistances.push(randomLimitedAssistance());
     }
 
-    return limitedAssistances
+    return limitedAssistances;
 }
 
-export function buildTranslationRequests(numTranslationRequests: number): TranslationRequest[] {
+export function buildTranslationRequests(
+    numTranslationRequests: number
+): TranslationRequest[] {
     const translationRequests: TranslationRequest[] = [];
-    
+
     for (let i = 0; i < numTranslationRequests; i++) {
         translationRequests.push(randomTranslationRequest());
     }
@@ -37,59 +84,89 @@ export function buildTranslationRequests(numTranslationRequests: number): Transl
     return translationRequests;
 }
 
-export function buildProfiles(usersData: UserData[]): Profile[] {
+export function buildProfiles(usersData: UserData[]): {
+    profiles: Profile[];
+    languages: ProfileLanguage[];
+    roles: Role[];
+} {
     const profiles: Profile[] = [];
+    const languages: ProfileLanguage[] = [];
+    const roles: Role[] = [];
 
     for (const user of usersData) {
-        profiles.push(randomProfile(user));
+        const p = randomProfile(user);
+        profiles.push(p);
+
+        const numLangs = randInt(1, 3);
+        languages.concat(randomProfileLanguages(p.user_id, numLangs));
+
+        const numRoles = randBool(0.7) ? 1 : 2;
+        randomProfileRole(p, numRoles);
+
+        if (roles.find((r) => r.role === "ATTORNEY")) {
+            p.bar_number = randomNumString(6).toString();
+            p.eoir_registered = randBool(0.7);
+            p.immigration_law_experience = randomExperience();
+        }
     }
 
-    return profiles;
+    return { profiles, languages, roles };
 }
 
 export function buildInterests(
     numInterests: number,
     types: {
-        cases: boolean,
-        limitedAssistances: boolean,
-        translationRequests: boolean
+        cases: boolean;
+        limitedAssistances: boolean;
+        translationRequests: boolean;
     },
-    listings: { 
-        cases?: CaseListing[], 
-        limitedAssistances?: LimitedAssistance[],
-        translationRequests?: TranslationRequest[]
+    listings: {
+        cases?: CaseListing[];
+        limitedAssistances?: LimitedAssistance[];
+        translationRequests?: TranslationRequest[];
     },
     profiles: Profile[]
 ): Interest[] {
+    if (profiles.length === 0) return [];
 
     const interests: Interest[] = [];
 
     // check config
-    if (!types.cases && !types.limitedAssistances && !types.translationRequests) {
+    if (
+        !types.cases &&
+        !types.limitedAssistances &&
+        !types.translationRequests
+    ) {
         throw new Error("At least one listing type must be selected!");
     } else if (types.cases && !listings.cases) {
-        throw new Error("Cases type is specified but cases listing array is empty!");
+        throw new Error(
+            "Cases type is specified but cases listing array is empty!"
+        );
     } else if (types.limitedAssistances && !listings.limitedAssistances) {
-        throw new Error("LimitedAssistance type is specified but limitedAssitance listing array is empty!");
+        throw new Error(
+            "LimitedAssistance type is specified but limitedAssitance listing array is empty!"
+        );
     } else if (types.translationRequests && !listings.translationRequests) {
-        throw new Error("TranslationRequest type is specified but translationRequest listing array is empty!");
+        throw new Error(
+            "TranslationRequest type is specified but translationRequest listing array is empty!"
+        );
     }
 
     // set config
     const listingOptions = [];
-    const typeOptions = [];
+    const typeOptions: ListingTypeEnum[] = [];
 
     if (types.cases) {
         listingOptions.push(listings.cases);
-        typeOptions.push(1);
+        typeOptions.push("CASE");
     }
     if (types.limitedAssistances) {
         listingOptions.push(listings.limitedAssistances);
-        typeOptions.push(2);
+        typeOptions.push("LIMITED_ASSISTANCE");
     }
     if (types.translationRequests) {
         listingOptions.push(listings.translationRequests);
-        typeOptions.push(3);
+        typeOptions.push("TRANSLATION_REQUEST");
     }
 
     const len = typeOptions.length;
@@ -98,20 +175,61 @@ export function buildInterests(
         const index = randInt(0, len);
         const listingsOp = listingOptions[index];
         const listingType = typeOptions[index];
-    
+
         // pick user
         const user = pickFrom(profiles);
-    
-        interests.push(randomInterest(pickFrom(listingsOp!), listingType, user));
+
+        interests.push(
+            randomInterest(pickFrom(listingsOp!), listingType, user)
+        );
     }
 
     return interests;
 }
 
+// helper functions for join table rows
+function randomListingLanguages(
+    listing_id: UUID,
+    num_languages: number
+): CaseLanguage[] {
+    const languages = randomIsoCodeList(num_languages);
+    return languages.map((l) => {
+        return { listing_id, iso_code: l };
+    });
+}
 
+function randomRelief(case_id: UUID): Relief {
+    return { listing_id: case_id, relief_code: randomReliefCode() };
+}
 
+function randomProfileLanguages(user_id: UUID, num: number): ProfileLanguage[] {
+    const langs = randomIsoCodeList(num);
 
-// helper functions
+    return langs.map((l) => {
+        return {
+            user_id,
+            iso_code: l,
+            can_read: randBool(),
+            can_write: randBool()
+        };
+    });
+}
+
+function randomProfileRole(profile: Profile, num_roles: number): Role[] {
+    const roles: RoleEnum[] = pickSomeFrom(
+        ["ATTORNEY", "INTERPRETER", "LEGAL_FELLOW", "TRANSLATOR"],
+        num_roles
+    );
+
+    return roles.map((r) => {
+        return {
+            user_id: profile.user_id,
+            role: r
+        };
+    });
+}
+
+// helper functions for table rows
 function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     const randSummaryLength = randInt(40, 60);
 
@@ -122,32 +240,31 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     legalServerSet.add(legalServerId);
 
     const c: CaseListing = {
-        id: randomUUID(),
+        id: randomUUID() as UUID,
         legal_server_id: legalServerId,
-        country: randomCountry(),
-        upcoming_date: randomDateFromNow(30, 180),
-        is_remote: randBool(),
-        languages: randomLanguageList(),
-        client_location: randomLocation(),
-        summary: randomParagraph(randSummaryLength),
-        needs_interpreter: randBool(),
         hours_per_month: randInt(20, 200),
-        title: randomParagraph(randInt(2, 8)),
-        num_months: randInt(1, 5),
-        in_court: randBool(),
-        needs_attorney: randBool(),
-        relief_sought: randomParagraph(randInt(5, 20)),
-        active: randBool(0.7)
+        adjudicating_agency: randomAgency(),
+        experience_needed: randomExperience()
     };
+
+    if (randBool()) c.title = randomParagraph(randInt(2, 8));
+    if (randBool()) c.summary = randomParagraph(randSummaryLength);
+    if (randBool()) c.country = randomCountry();
+    if (randBool()) c.client_location = randomLocation();
+    if (randBool()) c.num_months = randInt(1, 5);
+    if (randBool()) c.is_remote = randBool();
+    if (randBool()) c.needs_attorney = randBool();
+    if (randBool()) c.needs_interpreter = randBool();
+    if (randBool()) c.upcoming_date = randomDateFromNow(30, 180);
 
     return c;
 }
 
-function randomLimitedAssistance(caseListing: CaseListing): LimitedAssistance {
+function randomLimitedAssistance(): LimitedAssistance {
     const r: LimitedAssistance = {
-        id: randomUUID(),
-        summary: caseListing.summary,
-        languages: caseListing.languages,
+        id: randomUUID() as UUID,
+        summary: randomParagraph(randInt(5, 30)),
+        languages: randomIsoList(),
         country: randomCountry(),
         experience_level: randomExperience(),
         deadline: randomDateFromNow(21, 180),
@@ -161,8 +278,8 @@ function randomTranslationRequest(): TranslationRequest {
     const randSummaryLength = randInt(40, 60);
 
     const t: TranslationRequest = {
-        id: randomUUID(),
-        languages: randomLanguageList(),
+        id: randomUUID() as UUID,
+        languages: randomIsoList(),
         summary: randomParagraph(randSummaryLength),
         interest_ids: []
     };
@@ -175,39 +292,37 @@ function randomProfile(userData: UserData): Profile {
         user_id: userData.id,
         first_name: userData.first_name,
         last_name: userData.last_name,
-        roles: randomRoles(),
-        languages: randomLanguageOptions(),
         hours_per_month: randInt(40, 240),
-        immigration_law_experience: randomExperience(),
-        bar_number: randomNumString(6),
         start_date: randomDateFromNow(5, 14),
-        interest_ids: [],
-        status: randInt(0, 3),
         availability_description: randomParagraph(randInt(0, 30)),
-        eoir_registered: randBool(),
         location: randomLocation()
     };
 
     return u;
 }
 
-function randomInterest(listing: CaseListing | LimitedAssistance | TranslationRequest, listingType: number, profile: Profile): Interest {
-
-    const numToPick = randInt(1, profile.roles.length);
+function randomInterest(
+    listing: CaseListing | LimitedAssistance | TranslationRequest,
+    listingType: ListingTypeEnum,
+    profile: Profile
+): Interest {
+    const roles: RoleEnum[] =
+        listingType === "CASE"
+            ? pickFrom(["ATTORNEY", "INTERPRETER"])
+            : listingType === "LIMITED_ASSISTANCE"
+            ? ["LEGAL_FELLOW"]
+            : ["TRANSLATOR"];
 
     const it: Interest = {
-        id: randomUUID(),
         listing_id: listing.id,
+        user_id: profile.user_id,
         listing_type: listingType,
         form_response: {
             interestReason: randomParagraph(randInt(40, 60)),
-            interestType: pickSomeFrom(profile.roles, numToPick)
-        },
-        user_id: profile.user_id
-    }
-
-    profile.interest_ids.push(it.id);
+            rolesInterested: roles,
+            start_date: randomDateFromNow(0, 30)
+        }
+    };
 
     return it;
 }
-
