@@ -1,5 +1,6 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
 import {
+    knuthShuffleShallow,
     pickFrom,
     pickSomeFrom,
     randBool,
@@ -46,10 +47,12 @@ export function buildCases(numCases: number): {
 
     for (let i = 0; i < numCases; i++) {
         const c = randomCaseListing(caseLegalServerIds);
+        if (!c) break;
+
         cases.push(c);
 
         const numLangs = randInt(1, 3);
-        languages.concat(randomListingLanguages(c.id, numLangs));
+        languages.push(...randomListingLanguages(c.id, numLangs));
 
         const numReliefs = randInt(1, 4);
         for (let j = 0; j < numReliefs; j++) {
@@ -98,10 +101,10 @@ export function buildProfiles(usersData: UserData[]): {
         profiles.push(p);
 
         const numLangs = randInt(1, 3);
-        languages.concat(randomProfileLanguages(p.user_id, numLangs));
+        languages.push(...randomProfileLanguages(p.user_id, numLangs));
 
         const numRoles = randBool(0.7) ? 1 : 2;
-        randomProfileRole(p, numRoles);
+        roles.push(...randomProfileRole(p, numRoles));
 
         if (roles.find((r) => r.role === "ATTORNEY")) {
             p.bar_number = randomNumString(6).toString();
@@ -170,18 +173,32 @@ export function buildInterests(
     }
 
     const len = typeOptions.length;
+    const idPairings: Set<`${UUID},${UUID}`> = new Set();
 
     for (let i = 0; i < numInterests; i++) {
         const index = randInt(0, len);
         const listingsOp = listingOptions[index];
         const listingType = typeOptions[index];
+        const listing: CaseListing | LimitedAssistance | TranslationRequest =
+            pickFrom(listingsOp!);
 
         // pick user
-        const user = pickFrom(profiles);
+        const shuffledProfiles: Profile[] = knuthShuffleShallow(profiles);
+        let user = shuffledProfiles[0];
+        if (idPairings.has(`${listing.id},${user.user_id}`)) {
+            let found = false;
+            for (let j = 1; j < shuffledProfiles.length; j++) {
+                user = shuffledProfiles[j];
+                if (!idPairings.has(`${listing.id},${user.user_id}`)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) continue;
+        }
+        idPairings.add(`${listing.id},${user.user_id}`);
 
-        interests.push(
-            randomInterest(pickFrom(listingsOp!), listingType, user)
-        );
+        interests.push(randomInterest(listing, listingType, user));
     }
 
     return interests;
@@ -199,7 +216,10 @@ function randomListingLanguages(
 }
 
 function randomRelief(case_id: UUID): Relief {
-    return { listing_id: case_id, relief_code: randomReliefCode() };
+    return {
+        listing_id: case_id,
+        relief_code: randomReliefCode().toUpperCase()
+    };
 }
 
 function randomProfileLanguages(user_id: UUID, num: number): ProfileLanguage[] {
@@ -216,8 +236,12 @@ function randomProfileLanguages(user_id: UUID, num: number): ProfileLanguage[] {
 }
 
 function randomProfileRole(profile: Profile, num_roles: number): Role[] {
+    // const roles: RoleEnum[] = pickSomeFrom(
+    //     ["ATTORNEY", "INTERPRETER", "LEGAL_FELLOW", "TRANSLATOR"],
+    //     num_roles
+    // );
     const roles: RoleEnum[] = pickSomeFrom(
-        ["ATTORNEY", "INTERPRETER", "LEGAL_FELLOW", "TRANSLATOR"],
+        ["ATTORNEY", "INTERPRETER"],
         num_roles
     );
 
@@ -230,11 +254,12 @@ function randomProfileRole(profile: Profile, num_roles: number): Role[] {
 }
 
 // helper functions for table rows
-function randomCaseListing(legalServerSet: Set<number>): CaseListing {
+function randomCaseListing(legalServerSet: Set<number>): CaseListing | null {
     const randSummaryLength = randInt(40, 60);
 
     let legalServerId = randomNumString(3);
-    while (legalServerSet.has(legalServerId)) {
+    for (let i = 0; i < 1000; i++) {
+        if (!legalServerSet.has(legalServerId)) break;
         legalServerId = randomNumString(3);
     }
     legalServerSet.add(legalServerId);
@@ -247,15 +272,15 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
         experience_needed: randomExperience()
     };
 
-    if (randBool()) c.title = randomParagraph(randInt(2, 8));
-    if (randBool()) c.summary = randomParagraph(randSummaryLength);
-    if (randBool()) c.country = randomCountry();
-    if (randBool()) c.client_location = randomLocation();
-    if (randBool()) c.num_months = randInt(1, 5);
+    if (randBool(0.8)) c.title = randomParagraph(randInt(2, 8));
+    if (randBool(0.8)) c.summary = randomParagraph(randSummaryLength);
+    if (randBool(0.8)) c.country = randomCountry();
+    if (randBool(0.8)) c.client_location = randomLocation();
+    if (randBool(0.8)) c.num_months = randInt(1, 5);
     if (randBool()) c.is_remote = randBool();
     if (randBool()) c.needs_attorney = randBool();
     if (randBool()) c.needs_interpreter = randBool();
-    if (randBool()) c.upcoming_date = randomDateFromNow(30, 180);
+    if (randBool(0.8)) c.upcoming_date = randomDateFromNow(30, 180);
 
     return c;
 }
@@ -308,7 +333,7 @@ function randomInterest(
 ): Interest {
     const roles: RoleEnum[] =
         listingType === "CASE"
-            ? pickFrom(["ATTORNEY", "INTERPRETER"])
+            ? pickSomeFrom(["ATTORNEY", "INTERPRETER"], randInt(1, 3))
             : listingType === "LIMITED_ASSISTANCE"
             ? ["LEGAL_FELLOW"]
             : ["TRANSLATOR"];
@@ -320,7 +345,7 @@ function randomInterest(
         form_response: {
             interestReason: randomParagraph(randInt(40, 60)),
             rolesInterested: roles,
-            start_date: randomDateFromNow(0, 30)
+            start_date: randomDateFromNow(1, 30)
         }
     };
 
