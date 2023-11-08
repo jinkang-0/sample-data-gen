@@ -87,11 +87,11 @@ export type Profile = {
     last_name: string;
     location: string;
     hours_per_month: number;
-    immigration_law_experience: ExperienceEnum;
+    immigration_law_experience?: ExperienceEnum;
     bar_number?: string;
     start_date: string;
     availability_description?: string;
-    eoir_registered: boolean;
+    eoir_registered?: boolean;
 };
 
 export type LimitedAssistance = {

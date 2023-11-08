@@ -1,19 +1,19 @@
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
 import {
     pickFrom,
+    pickSomeFrom,
     randBool,
     randInt,
     randomAgency,
     randomCountry,
     randomDateFromNow,
     randomExperience,
-    randomGibberish,
-    randomIsoCode,
+    randomIsoCodeList,
     randomIsoList,
     randomLocation,
     randomNumString,
     randomParagraph,
-    randomRoleEnum
+    randomReliefCode
 } from "./tools.ts";
 import {
     CaseListing,
@@ -49,9 +49,7 @@ export function buildCases(numCases: number): {
         cases.push(c);
 
         const numLangs = randInt(1, 3);
-        for (let j = 0; j < numLangs; j++) {
-            languages.push(randomCaseLanguage(c.id));
-        }
+        languages.concat(randomListingLanguages(c.id, numLangs));
 
         const numReliefs = randInt(1, 4);
         for (let j = 0; j < numReliefs; j++) {
@@ -100,13 +98,15 @@ export function buildProfiles(usersData: UserData[]): {
         profiles.push(p);
 
         const numLangs = randInt(1, 3);
-        for (let j = 0; j < numLangs; j++) {
-            languages.push(randomProfileLanguage(p.user_id));
-        }
+        languages.concat(randomProfileLanguages(p.user_id, numLangs));
 
         const numRoles = randBool(0.7) ? 1 : 2;
-        for (let j = 0; j < numRoles; j++) {
-            roles.push(randomProfileRole(p.user_id));
+        randomProfileRole(p, numRoles);
+
+        if (roles.find((r) => r.role === "ATTORNEY")) {
+            p.bar_number = randomNumString(6).toString();
+            p.eoir_registered = randBool(0.7);
+            p.immigration_law_experience = randomExperience();
         }
     }
 
@@ -188,25 +188,45 @@ export function buildInterests(
 }
 
 // helper functions for join table rows
-function randomCaseLanguage(case_id: UUID): CaseLanguage {
-    return { listing_id: case_id, iso_code: randomIsoCode() };
+function randomListingLanguages(
+    listing_id: UUID,
+    num_languages: number
+): CaseLanguage[] {
+    const languages = randomIsoCodeList(num_languages);
+    return languages.map((l) => {
+        return { listing_id, iso_code: l };
+    });
 }
 
 function randomRelief(case_id: UUID): Relief {
-    return { listing_id: case_id, relief_code: randomGibberish() };
+    return { listing_id: case_id, relief_code: randomReliefCode() };
 }
 
-function randomProfileLanguage(user_id: UUID): ProfileLanguage {
-    return {
-        user_id,
-        iso_code: randomIsoCode(),
-        can_read: randBool(),
-        can_write: randBool()
-    };
+function randomProfileLanguages(user_id: UUID, num: number): ProfileLanguage[] {
+    const langs = randomIsoCodeList(num);
+
+    return langs.map((l) => {
+        return {
+            user_id,
+            iso_code: l,
+            can_read: randBool(),
+            can_write: randBool()
+        };
+    });
 }
 
-function randomProfileRole(user_id: UUID): Role {
-    return { user_id, role: randomRoleEnum() };
+function randomProfileRole(profile: Profile, num_roles: number): Role[] {
+    const roles: RoleEnum[] = pickSomeFrom(
+        ["ATTORNEY", "INTERPRETER", "LEGAL_FELLOW", "TRANSLATOR"],
+        num_roles
+    );
+
+    return roles.map((r) => {
+        return {
+            user_id: profile.user_id,
+            role: r
+        };
+    });
 }
 
 // helper functions for table rows
@@ -222,19 +242,20 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing {
     const c: CaseListing = {
         id: randomUUID() as UUID,
         legal_server_id: legalServerId,
-        country: randomCountry(),
-        upcoming_date: randomDateFromNow(30, 180),
-        is_remote: randBool(),
-        client_location: randomLocation(),
-        summary: randomParagraph(randSummaryLength),
-        needs_interpreter: randBool(),
         hours_per_month: randInt(20, 200),
-        title: randomParagraph(randInt(2, 8)),
-        num_months: randInt(1, 5),
         adjudicating_agency: randomAgency(),
-        needs_attorney: randBool(),
         experience_needed: randomExperience()
     };
+
+    if (randBool()) c.title = randomParagraph(randInt(2, 8));
+    if (randBool()) c.summary = randomParagraph(randSummaryLength);
+    if (randBool()) c.country = randomCountry();
+    if (randBool()) c.client_location = randomLocation();
+    if (randBool()) c.num_months = randInt(1, 5);
+    if (randBool()) c.is_remote = randBool();
+    if (randBool()) c.needs_attorney = randBool();
+    if (randBool()) c.needs_interpreter = randBool();
+    if (randBool()) c.upcoming_date = randomDateFromNow(30, 180);
 
     return c;
 }
@@ -272,11 +293,8 @@ function randomProfile(userData: UserData): Profile {
         first_name: userData.first_name,
         last_name: userData.last_name,
         hours_per_month: randInt(40, 240),
-        immigration_law_experience: randomExperience(),
-        bar_number: randomNumString(6).toString(),
         start_date: randomDateFromNow(5, 14),
         availability_description: randomParagraph(randInt(0, 30)),
-        eoir_registered: randBool(),
         location: randomLocation()
     };
 

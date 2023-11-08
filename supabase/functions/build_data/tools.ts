@@ -72,6 +72,10 @@ export function knuthShuffleShallow(arr: Array<any>): Array<any> {
 
 // basic pickers
 
+export function randomReliefCode(): string {
+    return `${randChar()}${randChar()}${randChar()}`;
+}
+
 export function randomLastName(): string {
     return pickFrom(sampleLastNames);
 }
@@ -98,6 +102,10 @@ export function randomStreet(): string {
 
 export function randomIsoCode(): string {
     return pickFrom(LIVING_ISO_CODES);
+}
+
+export function randomIsoCodeList(num: number): string[] {
+    return pickSomeFrom(LIVING_ISO_CODES, num);
 }
 
 export function randomGibberish(): string {
