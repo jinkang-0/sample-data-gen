@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
             await insertTo("cases", cases);
             await Promise.all([
                 insertTo("cases-languages", caseLanguages),
-                insertTo("reliefs", reliefs)
+                insertTo("cases-reliefs", reliefs)
             ]);
             console.log("CASES-RELATED TABLES SET!");
         }
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
             await insertTo("profiles", profiles);
             await Promise.all([
                 insertTo("profiles-languages", profileLanguages),
-                insertTo("roles", roles)
+                insertTo("profiles-roles", roles)
             ]);
             console.log("PROFILES-RELATED TABLES SET!");
         }

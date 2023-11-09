@@ -7,60 +7,65 @@ import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
 
 const randomUUID = v4.generate;
 
-console.log("Purging data...")
+console.log("Purging data...");
 
 Deno.serve(async (req) => {
-  try {
-    // connect to supabase
-    const supabase = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-        {
-            global: {
-                headers: { Authorization: req.headers.get('Authorization')! }
-            },
-            auth: {
-                persistSession: false
+    try {
+        // connect to supabase
+        const supabase = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+            {
+                global: {
+                    headers: {
+                        Authorization: req.headers.get("Authorization")!
+                    }
+                },
+                auth: {
+                    persistSession: false
+                }
             }
-        }
-    );
+        );
 
-    // if this point is reached without error, auth is good
+        // if this point is reached without error, auth is good
 
-    // purge original data
-    const nullUUID = randomUUID();
-    const deleteFrom = async (table: string, basedOnColumn: string) => {
-        const { error } = await supabase.from(table).delete().neq(basedOnColumn, nullUUID);
-        if (error)
-            throw new Error(`Error deleting ${table}: ${error.message}`);
+        // purge original data
+        const nullUUID = randomUUID();
+        const deleteFrom = async (table: string, basedOnColumn: string) => {
+            const { error } = await supabase
+                .from(table)
+                .delete()
+                .neq(basedOnColumn, nullUUID);
+            if (error)
+                throw new Error(`Error deleting ${table}: ${error.message}`);
+        };
+
+        await deleteFrom("cases", "id");
+        await deleteFrom("cases-languages", "listing_id");
+        await deleteFrom("cases-reliefs", "listing_id");
+
+        await deleteFrom("profiles", "user_id");
+        await deleteFrom("profiles-languages", "user_id");
+        await deleteFrom("profiles-roles", "user_id");
+
+        await deleteFrom("interests", "user_id");
+
+        console.log("Successfully purged data!");
+
+        return new Response(JSON.stringify({ message: "Success" }), {
+            headers: { "Content-Type": "application/json" },
+            status: 200
+        });
+
+        // catch errors
+    } catch (error) {
+        console.error(error);
+
+        return new Response(JSON.stringify({ error: error.message }), {
+            headers: { "Content-Type": "application/json" },
+            status: 400
+        });
     }
-
-    await deleteFrom("cases", "id");
-    await deleteFrom("cases-languages", "listing_id");
-    await deleteFrom("reliefs", "listing_id");
-
-    await deleteFrom("profiles", "user_id");
-    await deleteFrom("profiles-languages", "user_id");
-    await deleteFrom("roles", "user_id");
-
-    await deleteFrom("interests", "user_id");
-
-    console.log("Successfully purged data!");
-
-    return new Response(JSON.stringify({ message: "Success" }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200
-    });
-
-    // catch errors
-  } catch (error) {
-    console.error(error);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-    });
-  }
 });
 
 // To invoke:
