@@ -9,8 +9,7 @@ import {
     randomCountry,
     randomDateFromNow,
     randomExperience,
-    randomIsoCodeList,
-    randomIsoList,
+    randomLanguageNames,
     randomLocation,
     randomNumString,
     randomParagraph,
@@ -51,8 +50,7 @@ export function buildCases(numCases: number): {
 
         cases.push(c);
 
-        const numLangs = randInt(1, 3);
-        languages.push(...randomListingLanguages(c.id, numLangs));
+        languages.push(...randomListingLanguages(c.id));
 
         const numReliefs = randInt(1, 4);
         for (let j = 0; j < numReliefs; j++) {
@@ -100,8 +98,7 @@ export function buildProfiles(usersData: UserData[]): {
         const p = randomProfile(user);
         profiles.push(p);
 
-        const numLangs = randInt(1, 3);
-        languages.push(...randomProfileLanguages(p.user_id, numLangs));
+        languages.push(...randomProfileLanguages(p.user_id));
 
         const numRoles = randBool(0.7) ? 1 : 2;
         roles.push(...randomProfileRole(p, numRoles));
@@ -205,13 +202,10 @@ export function buildInterests(
 }
 
 // helper functions for join table rows
-function randomListingLanguages(
-    listing_id: UUID,
-    num_languages: number
-): CaseLanguage[] {
-    const languages = randomIsoCodeList(num_languages);
+function randomListingLanguages(listing_id: UUID): CaseLanguage[] {
+    const languages = randomLanguageNames();
     return languages.map((l) => {
-        return { listing_id, iso_code: l };
+        return { listing_id, language_name: l };
     });
 }
 
@@ -222,17 +216,15 @@ function randomRelief(case_id: UUID): Relief {
     };
 }
 
-function randomProfileLanguages(user_id: UUID, num: number): ProfileLanguage[] {
-    const langs = randomIsoCodeList(num);
+function randomProfileLanguages(user_id: UUID): ProfileLanguage[] {
+    const langs = randomLanguageNames();
 
-    return langs.map((l) => {
-        return {
-            user_id,
-            iso_code: l,
-            can_read: randBool(),
-            can_write: randBool()
-        };
-    });
+    return langs.map((l) => ({
+        user_id,
+        language_name: l,
+        can_read: randBool(),
+        can_speak: randBool()
+    }));
 }
 
 function randomProfileRole(profile: Profile, num_roles: number): Role[] {
@@ -289,7 +281,7 @@ function randomLimitedAssistance(): LimitedAssistance {
     const r: LimitedAssistance = {
         id: randomUUID() as UUID,
         summary: randomParagraph(randInt(5, 30)),
-        languages: randomIsoList(),
+        languages: randomLanguageNames(),
         country: randomCountry(),
         experience_level: randomExperience(),
         deadline: randomDateFromNow(21, 180),
@@ -304,7 +296,7 @@ function randomTranslationRequest(): TranslationRequest {
 
     const t: TranslationRequest = {
         id: randomUUID() as UUID,
-        languages: randomIsoList(),
+        languages: randomLanguageNames(),
         summary: randomParagraph(randSummaryLength),
         interest_ids: []
     };

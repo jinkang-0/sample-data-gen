@@ -32,14 +32,14 @@ export type UserData = {
 // join table rows
 export type CaseLanguage = {
     listing_id: UUID;
-    iso_code: string;
+    language_name: string;
 };
 
 export type ProfileLanguage = {
     user_id: UUID;
-    iso_code: string;
+    language_name: string;
     can_read: boolean;
-    can_write: boolean;
+    can_speak: boolean;
 };
 
 export type Relief = {

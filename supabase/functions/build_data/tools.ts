@@ -104,8 +104,16 @@ export function randomIsoCode(): string {
     return pickFrom(LIVING_ISO_CODES);
 }
 
-export function randomIsoCodeList(num: number): string[] {
-    return pickSomeFrom(LIVING_ISO_CODES, num);
+export function randomIsoCodeList(min = 1, max = 3): string[] {
+    const numLangs = randInt(min, max);
+    const shuffled = knuthShuffleShallow(LIVING_LANGUAGE_NAMES);
+    return shuffled.slice(0, numLangs);
+}
+
+export function randomLanguageNames(min = 1, max = 3): string[] {
+    const numLangs = randInt(min, max);
+    const shuffled = knuthShuffleShallow(LIVING_LANGUAGE_NAMES);
+    return shuffled.slice(0, numLangs);
 }
 
 export function randomGibberish(): string {
@@ -151,18 +159,6 @@ export function randomRoles(): RoleEnum[] {
     const shuffled: RoleEnum[] = knuthShuffleShallow(roles);
     const numRoles = randInt(1, 3);
     return shuffled.slice(0, numRoles);
-}
-
-export function randomIsoList(min = 1, max = 4): string[] {
-    const numLangs = randInt(min, max);
-    const shuffled = knuthShuffleShallow(LIVING_ISO_CODES);
-    return shuffled.slice(0, numLangs);
-}
-
-export function randomLanguageNames(min = 1, max = 4): string[] {
-    const numLangs = randInt(min, max);
-    const shuffled = knuthShuffleShallow(LIVING_LANGUAGE_NAMES);
-    return shuffled.slice(0, numLangs);
 }
 
 export function randomExperience(): ExperienceEnum {

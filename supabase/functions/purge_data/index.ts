@@ -4,6 +4,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { v4 } from "https://deno.land/std@0.91.0/uuid/mod.ts";
+import { randomParagraph } from "../build_data/tools.ts";
 
 const randomUUID = v4.generate;
 
@@ -30,25 +31,24 @@ Deno.serve(async (req) => {
         // if this point is reached without error, auth is good
 
         // purge original data
-        const nullUUID = randomUUID();
-        const deleteFrom = async (table: string, basedOnColumn: string) => {
+        const randomlyGeneratedUUID = randomUUID();
+        const randomlyGeneratedString = randomParagraph(10);
+        const deleteFrom = async (
+            table: string,
+            basedOnColumn: string,
+            value: unknown
+        ) => {
             const { error } = await supabase
                 .from(table)
                 .delete()
-                .neq(basedOnColumn, nullUUID);
+                .neq(basedOnColumn, value);
             if (error)
                 throw new Error(`Error deleting ${table}: ${error.message}`);
         };
 
-        await deleteFrom("cases", "id");
-        await deleteFrom("cases-languages", "listing_id");
-        await deleteFrom("cases-reliefs", "listing_id");
-
-        await deleteFrom("profiles", "user_id");
-        await deleteFrom("profiles-languages", "user_id");
-        await deleteFrom("profiles-roles", "user_id");
-
-        await deleteFrom("interests", "user_id");
+        await deleteFrom("cases", "id", randomlyGeneratedUUID);
+        await deleteFrom("interests", "listing_id", randomlyGeneratedUUID);
+        await deleteFrom("profiles", "first_name", randomlyGeneratedString);
 
         console.log("Successfully purged data!");
 
