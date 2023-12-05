@@ -219,12 +219,17 @@ function randomRelief(case_id: UUID): Relief {
 function randomProfileLanguages(user_id: UUID): ProfileLanguage[] {
     const langs = randomLanguageNames();
 
-    return langs.map((l) => ({
+    const mappedLangs = langs.map((l) => ({
         user_id,
         language_name: l,
         can_read: randBool(),
         can_speak: randBool()
     }));
+
+    mappedLangs[0].can_read = true;
+    mappedLangs[0].can_speak = true;
+
+    return mappedLangs;
 }
 
 function randomProfileRole(profile: Profile, num_roles: number): Role[] {
@@ -273,6 +278,9 @@ function randomCaseListing(legalServerSet: Set<number>): CaseListing | null {
     if (randBool()) c.needs_attorney = randBool();
     if (randBool()) c.needs_interpreter = randBool();
     if (randBool(0.8)) c.upcoming_date = randomDateFromNow(30, 180);
+
+    // force active
+    if (!c.needs_attorney && !c.needs_interpreter) c.needs_attorney = true;
 
     return c;
 }
