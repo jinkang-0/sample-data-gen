@@ -1,4 +1,6 @@
-### IJP Sample Data Generator
+### Sample Data Generator
+
+A sample data generator to assist development of Immigration Justice Project's user portal.
 
 Takes advantage of Supabase Edge Functions to run functions with queries, using Deno and pgnet.
 
